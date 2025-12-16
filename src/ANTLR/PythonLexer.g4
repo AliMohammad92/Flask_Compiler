@@ -78,8 +78,10 @@ S_OR       : 'or';
 NOT        : 'not';
 IN         : 'in';
 IS         : 'is';
+AS         : 'as';
 SET        : 'set';
-
+PIPE       : '|';
+TYPE       : 'type';
 // ------------------- JINJA2 -------------------
 INCLUDE    : 'include';
 EXTENDS    : 'extends';
@@ -126,6 +128,63 @@ SEMI       : ';';
 COMMA      : ',';
 DOT        : '.';
 HASHTAG    : '#';
+AT         : '@';
+
+CSS_COM_S  : '/*';
+CSS_COM_E  : '*/';
+
+// ------------------- HTML -------------------
+HTML       : 'html';
+HEAD       : 'head';
+BODY       : 'body';
+TITLE      : 'title';
+META       : 'meta';
+LINK       : 'link';
+STYLE      : 'style';
+SCRIPT     : 'script';
+
+DIV        : 'div';
+SPAN       : 'span';
+P          : 'p';
+A          : 'a';
+IMG        : 'img';
+SRC        : 'src';
+HREF       : 'href';
+ALT        : 'alt';
+LANG       : 'lang';
+
+H1         : 'h1';
+H2         : 'h2';
+H3         : 'h3';
+H4         : 'h4';
+H5         : 'h5';
+H6         : 'h6';
+
+UL         : 'ul';
+OL         : 'ol';
+LI         : 'li';
+
+TABLE      : 'table';
+TR         : 'tr';
+TD         : 'td';
+TH         : 'th';
+
+INPUT      : 'input';
+FORM       : 'form';
+BUTTON     : 'button';
+LABEL      : 'label';
+SELECT     : 'select';
+OPTION     : 'option';
+TEXTAREA   : 'textarea';
+
+ID         : 'id';
+NAME       : 'name';
+VALUE      : 'value';
+CONTENT    : 'content';
+REL        : 'rel';
+
+BR         : 'br';
+HR         : 'hr';
 
 // ------------------- Literals -------------------
 NUMBER
@@ -137,41 +196,14 @@ STRING
     | '\'' (~['\\] | '\\' .)* '\''
     ;
 
-//TEXT : (~[{] | '{' ~[{%#])*;
-
 // ------------------- Identifiers -------------------
+HTMLTEXT
+    : (~[<>{}] | '{' ~[{#%])*?
+    ;
+
 IDENTIFIER
     : [a-zA-Z_][a-zA-Z_0-9]*
     ;
-
-// ------------------- Whitespace & Indent -------------------
-//NEWLINE
-// : ('\r'? '\n') [ \t]* {
-//       String text = getText().replaceAll("[\r\n]+", "");
-//       int indent = text.length();
-//
-//       // skip blank lines
-//       if (text.isEmpty()) {
-//           skip();
-//           return;
-//       }
-//
-//       int previous = indents.isEmpty() ? 0 : indents.peek();
-//
-//       if (indent > previous) {
-//           indents.push(indent);
-//           addToken(createToken(PythonLexer.TAB_IN, "<TAB_IN>"));
-//       } else if (indent < previous) {
-//           while (!indents.isEmpty() && indent < indents.peek()) {
-//               indents.pop();
-//               addToken(createToken(PythonLexer.TAB_OUT, "<TAB_OUT>"));
-//           }
-//       }
-//
-//       // always add NEWLINE token
-//       addToken(createToken(NEWLINE, "\n"));
-// }
-// ;
 
 // ------------------- Skip Spaces -------------------
 COMMENT
