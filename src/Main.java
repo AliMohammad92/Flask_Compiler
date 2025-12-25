@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        PythonLexer lexer = new PythonLexer(CharStreams.fromFileName("C:\\Users\\Ali\\IdeaProjects\\Flask_Compiler\\src\\test.py"));
+        PythonLexer lexer = new PythonLexer(CharStreams.fromFileName("/home/ali/IdeaProjects/Flask_Compiler/src/test.py"));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         PythonParser parser = new PythonParser(tokens);
 

@@ -3,9 +3,13 @@ package AST;
 import org.antlr.runtime.tree.TreeWizard;
 
 public class IdentifierNode extends ASTNode {
-    public String name;
+    private String name;
 
     public IdentifierNode(String name) {
+        this.name = name;
+    }
+
+    public void setName(String name) {
         this.name = name;
     }
 

@@ -12,7 +12,6 @@ public abstract class ASTNode {
     protected String formatLine(String prefix, boolean isTail, String text) {
         return prefix + (isTail ? "└── " : "├── ") + text + "\n";
     }
-
     protected String nextPrefix(String prefix, boolean isTail) {
         return prefix + (isTail ? "    " : "│   ");
     }

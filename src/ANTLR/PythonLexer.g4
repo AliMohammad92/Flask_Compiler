@@ -81,7 +81,7 @@ IS         : 'is';
 AS         : 'as';
 SET        : 'set';
 PIPE       : '|';
-TYPE       : 'type';
+GLOBAL     : 'global';
 // ------------------- JINJA2 -------------------
 INCLUDE    : 'include';
 EXTENDS    : 'extends';
@@ -127,64 +127,20 @@ COLON      : ':';
 SEMI       : ';';
 COMMA      : ',';
 DOT        : '.';
+HASHTAG_VALUE : '#' [a-fA-F0-9]+ ;
 HASHTAG    : '#';
 AT         : '@';
 
 CSS_COM_S  : '/*';
 CSS_COM_E  : '*/';
 
-// ------------------- HTML -------------------
-HTML       : 'html';
-HEAD       : 'head';
-BODY       : 'body';
-TITLE      : 'title';
-META       : 'meta';
-LINK       : 'link';
-STYLE      : 'style';
-SCRIPT     : 'script';
-
-DIV        : 'div';
-SPAN       : 'span';
-P          : 'p';
-A          : 'a';
-IMG        : 'img';
-SRC        : 'src';
-HREF       : 'href';
-ALT        : 'alt';
-LANG       : 'lang';
-
-H1         : 'h1';
-H2         : 'h2';
-H3         : 'h3';
-H4         : 'h4';
-H5         : 'h5';
-H6         : 'h6';
-
-UL         : 'ul';
-OL         : 'ol';
-LI         : 'li';
-
-TABLE      : 'table';
-TR         : 'tr';
-TD         : 'td';
-TH         : 'th';
-
-INPUT      : 'input';
-FORM       : 'form';
-BUTTON     : 'button';
-LABEL      : 'label';
-SELECT     : 'select';
-OPTION     : 'option';
-TEXTAREA   : 'textarea';
-
-ID         : 'id';
-NAME       : 'name';
-VALUE      : 'value';
-CONTENT    : 'content';
-REL        : 'rel';
-
-BR         : 'br';
-HR         : 'hr';
+// ----------------- HTML & CSS -------------------
+//HTML_TAG            : LT IDENTIFIER GT;
+//HTML_CLOSE_TAG      : LT SLASH IDENTIFIER GT;
+STYLE : 'style';
+TYPE
+    : ('px' | 'em' | 'rem' | '%' | 'vh' | 'vw' | 'deg' | 's' | 'ms')
+    ;
 
 // ------------------- Literals -------------------
 NUMBER
@@ -197,9 +153,6 @@ STRING
     ;
 
 // ------------------- Identifiers -------------------
-HTMLTEXT
-    : (~[<>{}] | '{' ~[{#%])*?
-    ;
 
 IDENTIFIER
     : [a-zA-Z_][a-zA-Z_0-9]*

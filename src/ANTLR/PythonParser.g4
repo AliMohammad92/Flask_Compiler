@@ -6,7 +6,6 @@ options { tokenVocab = PythonLexer; }
 program
     : (statement)* EOF
     ;
-
 // ------------------- Statements -------------------
 statement
     : simpleStatement (SEMI simpleStatement)*
@@ -14,7 +13,6 @@ statement
     | html
     | css
     | jinjaBody
-//    | flask
     ;
 
 simpleStatement
@@ -23,6 +21,7 @@ simpleStatement
     | printStatement
     | returnStatement
     | functionCall
+    | globalStatement
     ;
 
 compoundStatement
@@ -44,11 +43,17 @@ value
     | expressions
     | list
     | tuple
+    | json
     | functionCall
+    | listComprehension
     ;
 
 list
     : LBRACK elements RBRACK
+    ;
+
+listComprehension
+    : LBRACK atom FOR IDENTIFIER IN value (IF expressions)? RBRACK
     ;
 
 tuple
@@ -57,6 +62,14 @@ tuple
 
 elements
     : value? (COMMA value)*
+    ;
+
+json
+    : LCBRACK (jsonData (COMMA jsonData)*)? RCBRACK
+    ;
+
+jsonData
+    :  STRING COLON value
     ;
 
 // ------------------- Expressions -------------------
@@ -85,7 +98,7 @@ mathematicalExpressions
     | left=mathematicalExpressions MULTIPLY right=mathematicalExpressions      #MulExp
     | left=mathematicalExpressions SLASH right=mathematicalExpressions         #DivExp
     | left=mathematicalExpressions MOD right=mathematicalExpressions           #ModExp
-    | atom                                                                     #AtomMath
+    | valuesExp                                                                #ValueExp
     ;
 
 logicalExpressions
@@ -93,7 +106,12 @@ logicalExpressions
     | left=logicalExpressions (OR  | S_OR) right=logicalExpressions            #OrExp
     | NOT item=logicalExpressions                                              #NotExp
     | comparisonExpressions                                                    #CompAsLogical
-    | atom                                                                     #AtomAsLogical
+    | valuesExp                                                                #ValuesAsLogical
+    ;
+
+valuesExp
+    : atom
+    | functionCall
     ;
 
 atom
@@ -114,6 +132,9 @@ postfix
     | LBRACK (expressions | atom) RBRACK  #IndexAccess
     ;
 
+globalStatement
+    : GLOBAL IDENTIFIER (COMMA IDENTIFIER)*
+    ;
 // ------------------- Import Statement -------------------
 
 pythonImport
@@ -161,11 +182,11 @@ ifStatement
     ;
 
 ifBlock
-    : IF LPAREN condition=logicalExpressions RPAREN block
+    : IF LPAREN? condition=logicalExpressions RPAREN? block
     ;
 
 elifBlock
-    : ELIF LPAREN condition=logicalExpressions RPAREN block
+    : ELIF LPAREN? condition=logicalExpressions RPAREN? block
     ;
 
 elseBlock
@@ -173,17 +194,21 @@ elseBlock
     ;
 
 // ------------------- Loops -------------------
+forLoop
+    : FOR IDENTIFIER IN iterable=value block;
 
-forLoop: FOR IDENTIFIER IN iterable=value block;
-whileLoop: WHILE LPAREN expressions RPAREN block;
+whileLoop
+    : WHILE LPAREN expressions RPAREN block;
 
 // ------------------- Function -------------------
+function
+    : decorator_rule* DEF IDENTIFIER LPAREN parameters? RPAREN block;
 
-function: decorator_rule* DEF IDENTIFIER LPAREN parameters? RPAREN block;
+parameters
+    : parameter (COMMA parameter)*;
 
-parameters: parameter (COMMA parameter)*;
-
-parameter: IDENTIFIER (ASSIGN value)?;
+parameter
+    : IDENTIFIER (ASSIGN value)?;
 
 returnStatement
     : RETURN value?
@@ -304,42 +329,24 @@ html
 htmlElement
     : htmlTag
     | selfClosingTag
-    | htmlButton
-    | htmlForm
     | htmlText
     ;
 
 htmlTag
-    : LT HTML htmlAttributes* GT htmlBody LT SLASH HTML GT           #htmlRoot
-    | LT HEAD htmlAttributes* GT htmlBody LT SLASH HEAD GT           #headTag
-    | LT BODY htmlAttributes* GT htmlBody LT SLASH BODY GT           #bodyTag
-    | LT DIV htmlAttributes* GT htmlBody LT SLASH DIV GT             #divTag
-    | LT SPAN htmlAttributes* GT htmlBody LT SLASH SPAN GT           #spanTag
-    | LT P htmlAttributes* GT htmlBody LT SLASH P GT                 #pTag
-    | LT A htmlAttributes* GT htmlBody LT SLASH A GT                 #aTag
-    | LT H1 htmlAttributes* GT htmlBody LT SLASH H1 GT               #h1Tag
-    | LT H2 htmlAttributes* GT htmlBody LT SLASH H2 GT               #h2Tag
-    | LT H3 htmlAttributes* GT htmlBody LT SLASH H3 GT               #h3Tag
-    | LT H4 htmlAttributes* GT htmlBody LT SLASH H4 GT               #h4Tag
-    | LT H5 htmlAttributes* GT htmlBody LT SLASH H5 GT               #h5Tag
-    | LT H6 htmlAttributes* GT htmlBody LT SLASH H6 GT               #h6Tag
-    | LT TABLE htmlAttributes* GT htmlBody LT SLASH TABLE GT         #tableTag
-    | LT TR htmlAttributes* GT htmlBody LT SLASH TR GT               #trTag
-    | LT TD htmlAttributes* GT htmlBody LT SLASH TD GT               #tdTag
-    | LT TH htmlAttributes* GT htmlBody LT SLASH TH GT               #thTag
-    | LT UL htmlAttributes* GT htmlBody LT SLASH UL GT               #ulTag
-    | LT OL htmlAttributes* GT htmlBody LT SLASH OL GT               #olTag
-    | LT LI htmlAttributes* GT htmlBody LT SLASH LI GT               #liTag
+    : styleTag
+    | genericHtml
     ;
 
+styleTag
+    : LT STYLE htmlAttributes* GT css* LT SLASH STYLE GT
+    ;
+
+genericHtml
+    : LT IDENTIFIER htmlAttributes* GT htmlBody? LT SLASH IDENTIFIER GT
+    ;
 
 selfClosingTag
-    : LT META htmlAttributes* SLASH GT
-    | LT LINK htmlAttributes* SLASH GT
-    | LT IMG htmlAttributes* SLASH GT
-    | LT INPUT htmlAttributes* SLASH GT
-    | LT BR SLASH GT
-    | LT HR SLASH GT
+    : LT IDENTIFIER htmlAttributes* SLASH GT
     ;
 
 htmlAttributes
@@ -347,17 +354,8 @@ htmlAttributes
     ;
 
 attributeName
-    : CLASS
-    | ID
-    | NAME
-    | TYPE
-    | VALUE
-    | HREF
-    | SRC
-    | ALT
-    | REL
-    | CONTENT
-    | LANG
+    : IDENTIFIER
+    | CLASS
     ;
 
 attributeValue
@@ -365,44 +363,43 @@ attributeValue
     ;
 
 htmlBody
-    : htmlElement*
-    ;
-
-htmlButton
-    : LT BUTTON htmlAttributes* GT htmlBody LT SLASH BUTTON GT
-    ;
-
-htmlForm
-    : LT FORM htmlAttributes* GT htmlBody LT SLASH FORM GT
+    : (htmlElement
+    | htmlText
+    | jinjaBody
+    )+
     ;
 
 htmlText
-    : (HTMLTEXT | jinjaExpression | jinjaStatement)+
+    : (IDENTIFIER
+    | STRING
+    | jinjaExpression
+    )+
     ;
-
 
 // ------------------- CSS -------------------
 css
     : cssSelector (COMMA cssSelector)* LCBRACK (cssKeyValue)* RCBRACK
+    | cssComment
     ;
 
 cssSelector
     : (DOT | HASHTAG)? cssKey (COLON cssKey)*
     ;
 
+cssKeyValue
+    : cssKey COLON cssValue SEMI?
+    ;
+
 cssKey
     : IDENTIFIER (MINUS IDENTIFIER?)*
     ;
 
-cssKeyValue
-    : cssKey COLON cssValue (SEMI)?
-    ;
-
 cssValue
-    : NUMBER (TYPE)?
-    | IDENTIFIER
-    | HASHTAG IDENTIFIER
-    | STRING
+    : NUMBER (TYPE)?                    #cssVNumber
+    | IDENTIFIER                        #cssVId
+    | HASHTAG_VALUE                     #cssVColor
+    | STRING                            #cssVStr
+    | jinjaExpression                   #cssVJinja
     ;
 
 cssComment

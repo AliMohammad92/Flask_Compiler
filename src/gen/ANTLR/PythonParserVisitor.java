@@ -1,4 +1,4 @@
-// Generated from C:/Users/Ali/IdeaProjects/Flask_Compiler/src/ANTLR/PythonParser.g4 by ANTLR 4.13.2
+// Generated from /home/ali/IdeaProjects/Flask_Compiler/src/ANTLR/PythonParser.g4 by ANTLR 4.13.2
 package gen.ANTLR;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -53,6 +53,12 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitList(PythonParser.ListContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link PythonParser#listComprehension}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitListComprehension(PythonParser.ListComprehensionContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link PythonParser#tuple}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -64,6 +70,18 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitElements(PythonParser.ElementsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PythonParser#json}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitJson(PythonParser.JsonContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PythonParser#jsonData}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitJsonData(PythonParser.JsonDataContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PythonParser#expressions}.
 	 * @param ctx the parse tree
@@ -141,19 +159,19 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitMembershipTest(PythonParser.MembershipTestContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code ValueExp}
+	 * labeled alternative in {@link PythonParser#mathematicalExpressions}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitValueExp(PythonParser.ValueExpContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code MulExp}
 	 * labeled alternative in {@link PythonParser#mathematicalExpressions}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitMulExp(PythonParser.MulExpContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code AtomMath}
-	 * labeled alternative in {@link PythonParser#mathematicalExpressions}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAtomMath(PythonParser.AtomMathContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code ModExp}
 	 * labeled alternative in {@link PythonParser#mathematicalExpressions}.
@@ -204,6 +222,13 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCompAsLogical(PythonParser.CompAsLogicalContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code ValuesAsLogical}
+	 * labeled alternative in {@link PythonParser#logicalExpressions}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitValuesAsLogical(PythonParser.ValuesAsLogicalContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code OrExp}
 	 * labeled alternative in {@link PythonParser#logicalExpressions}.
 	 * @param ctx the parse tree
@@ -211,12 +236,11 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitOrExp(PythonParser.OrExpContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code AtomAsLogical}
-	 * labeled alternative in {@link PythonParser#logicalExpressions}.
+	 * Visit a parse tree produced by {@link PythonParser#valuesExp}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitAtomAsLogical(PythonParser.AtomAsLogicalContext ctx);
+	T visitValuesExp(PythonParser.ValuesExpContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code AtomWithAccess}
 	 * labeled alternative in {@link PythonParser#atom}.
@@ -273,6 +297,12 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitIndexAccess(PythonParser.IndexAccessContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PythonParser#globalStatement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGlobalStatement(PythonParser.GlobalStatementContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PythonParser#pythonImport}.
 	 * @param ctx the parse tree
@@ -543,145 +573,23 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitHtmlElement(PythonParser.HtmlElementContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code htmlRoot}
-	 * labeled alternative in {@link PythonParser#htmlTag}.
+	 * Visit a parse tree produced by {@link PythonParser#htmlTag}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitHtmlRoot(PythonParser.HtmlRootContext ctx);
+	T visitHtmlTag(PythonParser.HtmlTagContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code headTag}
-	 * labeled alternative in {@link PythonParser#htmlTag}.
+	 * Visit a parse tree produced by {@link PythonParser#styleTag}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitHeadTag(PythonParser.HeadTagContext ctx);
+	T visitStyleTag(PythonParser.StyleTagContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code bodyTag}
-	 * labeled alternative in {@link PythonParser#htmlTag}.
+	 * Visit a parse tree produced by {@link PythonParser#genericHtml}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitBodyTag(PythonParser.BodyTagContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code divTag}
-	 * labeled alternative in {@link PythonParser#htmlTag}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitDivTag(PythonParser.DivTagContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code spanTag}
-	 * labeled alternative in {@link PythonParser#htmlTag}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSpanTag(PythonParser.SpanTagContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code pTag}
-	 * labeled alternative in {@link PythonParser#htmlTag}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitPTag(PythonParser.PTagContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code aTag}
-	 * labeled alternative in {@link PythonParser#htmlTag}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitATag(PythonParser.ATagContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code h1Tag}
-	 * labeled alternative in {@link PythonParser#htmlTag}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitH1Tag(PythonParser.H1TagContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code h2Tag}
-	 * labeled alternative in {@link PythonParser#htmlTag}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitH2Tag(PythonParser.H2TagContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code h3Tag}
-	 * labeled alternative in {@link PythonParser#htmlTag}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitH3Tag(PythonParser.H3TagContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code h4Tag}
-	 * labeled alternative in {@link PythonParser#htmlTag}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitH4Tag(PythonParser.H4TagContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code h5Tag}
-	 * labeled alternative in {@link PythonParser#htmlTag}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitH5Tag(PythonParser.H5TagContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code h6Tag}
-	 * labeled alternative in {@link PythonParser#htmlTag}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitH6Tag(PythonParser.H6TagContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code tableTag}
-	 * labeled alternative in {@link PythonParser#htmlTag}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTableTag(PythonParser.TableTagContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code trTag}
-	 * labeled alternative in {@link PythonParser#htmlTag}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTrTag(PythonParser.TrTagContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code tdTag}
-	 * labeled alternative in {@link PythonParser#htmlTag}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTdTag(PythonParser.TdTagContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code thTag}
-	 * labeled alternative in {@link PythonParser#htmlTag}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitThTag(PythonParser.ThTagContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code ulTag}
-	 * labeled alternative in {@link PythonParser#htmlTag}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitUlTag(PythonParser.UlTagContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code olTag}
-	 * labeled alternative in {@link PythonParser#htmlTag}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitOlTag(PythonParser.OlTagContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code liTag}
-	 * labeled alternative in {@link PythonParser#htmlTag}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLiTag(PythonParser.LiTagContext ctx);
+	T visitGenericHtml(PythonParser.GenericHtmlContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PythonParser#selfClosingTag}.
 	 * @param ctx the parse tree
@@ -713,18 +621,6 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitHtmlBody(PythonParser.HtmlBodyContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link PythonParser#htmlButton}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitHtmlButton(PythonParser.HtmlButtonContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link PythonParser#htmlForm}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitHtmlForm(PythonParser.HtmlFormContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link PythonParser#htmlText}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -743,23 +639,52 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCssSelector(PythonParser.CssSelectorContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link PythonParser#cssKey}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCssKey(PythonParser.CssKeyContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link PythonParser#cssKeyValue}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitCssKeyValue(PythonParser.CssKeyValueContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link PythonParser#cssValue}.
+	 * Visit a parse tree produced by {@link PythonParser#cssKey}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitCssValue(PythonParser.CssValueContext ctx);
+	T visitCssKey(PythonParser.CssKeyContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code cssVNumber}
+	 * labeled alternative in {@link PythonParser#cssValue}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCssVNumber(PythonParser.CssVNumberContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code cssVId}
+	 * labeled alternative in {@link PythonParser#cssValue}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCssVId(PythonParser.CssVIdContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code cssVColor}
+	 * labeled alternative in {@link PythonParser#cssValue}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCssVColor(PythonParser.CssVColorContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code cssVStr}
+	 * labeled alternative in {@link PythonParser#cssValue}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCssVStr(PythonParser.CssVStrContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code cssVJinja}
+	 * labeled alternative in {@link PythonParser#cssValue}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCssVJinja(PythonParser.CssVJinjaContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PythonParser#cssComment}.
 	 * @param ctx the parse tree

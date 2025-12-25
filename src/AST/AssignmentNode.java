@@ -20,7 +20,6 @@ public class AssignmentNode extends ASTNode{
         if (value != null) {
             sb.append(value.toTreeString(nextPrefix(prefix, isTail), true));
         }
-
         return sb.toString();
     }
 }

@@ -2,10 +2,10 @@ package AST.HTML;
 
 import AST.ASTNode;
 
-public class TextNode extends ASTNode {
+public class HtmlTextNode extends ASTNode {
     private String text;
 
-    public TextNode(String text) {
+    public HtmlTextNode(String text) {
         this.text = text;
     }
 
