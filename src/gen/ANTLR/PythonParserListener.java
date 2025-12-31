@@ -540,49 +540,49 @@ public interface PythonParserListener extends ParseTreeListener {
 	 */
 	void exitStrImport(PythonParser.StrImportContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link PythonParser#fromImport}.
+	 * @param ctx the parse tree
+	 */
+	void enterFromImport(PythonParser.FromImportContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PythonParser#fromImport}.
+	 * @param ctx the parse tree
+	 */
+	void exitFromImport(PythonParser.FromImportContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code idFromImport}
-	 * labeled alternative in {@link PythonParser#fromImport}.
+	 * labeled alternative in {@link PythonParser#importSource}.
 	 * @param ctx the parse tree
 	 */
 	void enterIdFromImport(PythonParser.IdFromImportContext ctx);
 	/**
 	 * Exit a parse tree produced by the {@code idFromImport}
-	 * labeled alternative in {@link PythonParser#fromImport}.
+	 * labeled alternative in {@link PythonParser#importSource}.
 	 * @param ctx the parse tree
 	 */
 	void exitIdFromImport(PythonParser.IdFromImportContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code strFromImport}
-	 * labeled alternative in {@link PythonParser#fromImport}.
+	 * labeled alternative in {@link PythonParser#importSource}.
 	 * @param ctx the parse tree
 	 */
 	void enterStrFromImport(PythonParser.StrFromImportContext ctx);
 	/**
 	 * Exit a parse tree produced by the {@code strFromImport}
-	 * labeled alternative in {@link PythonParser#fromImport}.
+	 * labeled alternative in {@link PythonParser#importSource}.
 	 * @param ctx the parse tree
 	 */
 	void exitStrFromImport(PythonParser.StrFromImportContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link PythonParser#importedNames}.
+	 * Enter a parse tree produced by {@link PythonParser#importList}.
 	 * @param ctx the parse tree
 	 */
-	void enterImportedNames(PythonParser.ImportedNamesContext ctx);
+	void enterImportList(PythonParser.ImportListContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link PythonParser#importedNames}.
+	 * Exit a parse tree produced by {@link PythonParser#importList}.
 	 * @param ctx the parse tree
 	 */
-	void exitImportedNames(PythonParser.ImportedNamesContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link PythonParser#importsAliases}.
-	 * @param ctx the parse tree
-	 */
-	void enterImportsAliases(PythonParser.ImportsAliasesContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link PythonParser#importsAliases}.
-	 * @param ctx the parse tree
-	 */
-	void exitImportsAliases(PythonParser.ImportsAliasesContext ctx);
+	void exitImportList(PythonParser.ImportListContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link PythonParser#printStatement}.
 	 * @param ctx the parse tree
@@ -704,15 +704,39 @@ public interface PythonParserListener extends ParseTreeListener {
 	 */
 	void exitParameter(PythonParser.ParameterContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link PythonParser#returnStatement}.
+	 * Enter a parse tree produced by the {@code returnTripleString}
+	 * labeled alternative in {@link PythonParser#returnStatement}.
 	 * @param ctx the parse tree
 	 */
-	void enterReturnStatement(PythonParser.ReturnStatementContext ctx);
+	void enterReturnTripleString(PythonParser.ReturnTripleStringContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link PythonParser#returnStatement}.
+	 * Exit a parse tree produced by the {@code returnTripleString}
+	 * labeled alternative in {@link PythonParser#returnStatement}.
 	 * @param ctx the parse tree
 	 */
-	void exitReturnStatement(PythonParser.ReturnStatementContext ctx);
+	void exitReturnTripleString(PythonParser.ReturnTripleStringContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code returnValue}
+	 * labeled alternative in {@link PythonParser#returnStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterReturnValue(PythonParser.ReturnValueContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code returnValue}
+	 * labeled alternative in {@link PythonParser#returnStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitReturnValue(PythonParser.ReturnValueContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PythonParser#tripleString}.
+	 * @param ctx the parse tree
+	 */
+	void enterTripleString(PythonParser.TripleStringContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PythonParser#tripleString}.
+	 * @param ctx the parse tree
+	 */
+	void exitTripleString(PythonParser.TripleStringContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link PythonParser#functionCall}.
 	 * @param ctx the parse tree
@@ -1006,16 +1030,6 @@ public interface PythonParserListener extends ParseTreeListener {
 	 */
 	void exitHtmlAttributes(PythonParser.HtmlAttributesContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link PythonParser#attributeName}.
-	 * @param ctx the parse tree
-	 */
-	void enterAttributeName(PythonParser.AttributeNameContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link PythonParser#attributeName}.
-	 * @param ctx the parse tree
-	 */
-	void exitAttributeName(PythonParser.AttributeNameContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link PythonParser#attributeValue}.
 	 * @param ctx the parse tree
 	 */
@@ -1026,25 +1040,89 @@ public interface PythonParserListener extends ParseTreeListener {
 	 */
 	void exitAttributeValue(PythonParser.AttributeValueContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link PythonParser#htmlBody}.
+	 * Enter a parse tree produced by the {@code normalText}
+	 * labeled alternative in {@link PythonParser#htmlText}.
 	 * @param ctx the parse tree
 	 */
-	void enterHtmlBody(PythonParser.HtmlBodyContext ctx);
+	void enterNormalText(PythonParser.NormalTextContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link PythonParser#htmlBody}.
+	 * Exit a parse tree produced by the {@code normalText}
+	 * labeled alternative in {@link PythonParser#htmlText}.
 	 * @param ctx the parse tree
 	 */
-	void exitHtmlBody(PythonParser.HtmlBodyContext ctx);
+	void exitNormalText(PythonParser.NormalTextContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link PythonParser#htmlText}.
+	 * Enter a parse tree produced by the {@code quotedText}
+	 * labeled alternative in {@link PythonParser#htmlText}.
 	 * @param ctx the parse tree
 	 */
-	void enterHtmlText(PythonParser.HtmlTextContext ctx);
+	void enterQuotedText(PythonParser.QuotedTextContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link PythonParser#htmlText}.
+	 * Exit a parse tree produced by the {@code quotedText}
+	 * labeled alternative in {@link PythonParser#htmlText}.
 	 * @param ctx the parse tree
 	 */
-	void exitHtmlText(PythonParser.HtmlTextContext ctx);
+	void exitQuotedText(PythonParser.QuotedTextContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code tagAsText}
+	 * labeled alternative in {@link PythonParser#htmlText}.
+	 * @param ctx the parse tree
+	 */
+	void enterTagAsText(PythonParser.TagAsTextContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code tagAsText}
+	 * labeled alternative in {@link PythonParser#htmlText}.
+	 * @param ctx the parse tree
+	 */
+	void exitTagAsText(PythonParser.TagAsTextContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code attrAsText}
+	 * labeled alternative in {@link PythonParser#htmlText}.
+	 * @param ctx the parse tree
+	 */
+	void enterAttrAsText(PythonParser.AttrAsTextContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code attrAsText}
+	 * labeled alternative in {@link PythonParser#htmlText}.
+	 * @param ctx the parse tree
+	 */
+	void exitAttrAsText(PythonParser.AttrAsTextContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code idAsText}
+	 * labeled alternative in {@link PythonParser#htmlText}.
+	 * @param ctx the parse tree
+	 */
+	void enterIdAsText(PythonParser.IdAsTextContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code idAsText}
+	 * labeled alternative in {@link PythonParser#htmlText}.
+	 * @param ctx the parse tree
+	 */
+	void exitIdAsText(PythonParser.IdAsTextContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code classAsText}
+	 * labeled alternative in {@link PythonParser#htmlText}.
+	 * @param ctx the parse tree
+	 */
+	void enterClassAsText(PythonParser.ClassAsTextContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code classAsText}
+	 * labeled alternative in {@link PythonParser#htmlText}.
+	 * @param ctx the parse tree
+	 */
+	void exitClassAsText(PythonParser.ClassAsTextContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code jinjaAsText}
+	 * labeled alternative in {@link PythonParser#htmlText}.
+	 * @param ctx the parse tree
+	 */
+	void enterJinjaAsText(PythonParser.JinjaAsTextContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code jinjaAsText}
+	 * labeled alternative in {@link PythonParser#htmlText}.
+	 * @param ctx the parse tree
+	 */
+	void exitJinjaAsText(PythonParser.JinjaAsTextContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link PythonParser#css}.
 	 * @param ctx the parse tree
@@ -1056,15 +1134,63 @@ public interface PythonParserListener extends ParseTreeListener {
 	 */
 	void exitCss(PythonParser.CssContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link PythonParser#cssSelector}.
+	 * Enter a parse tree produced by the {@code descendantSelector}
+	 * labeled alternative in {@link PythonParser#cssSelector}.
 	 * @param ctx the parse tree
 	 */
-	void enterCssSelector(PythonParser.CssSelectorContext ctx);
+	void enterDescendantSelector(PythonParser.DescendantSelectorContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link PythonParser#cssSelector}.
+	 * Exit a parse tree produced by the {@code descendantSelector}
+	 * labeled alternative in {@link PythonParser#cssSelector}.
 	 * @param ctx the parse tree
 	 */
-	void exitCssSelector(PythonParser.CssSelectorContext ctx);
+	void exitDescendantSelector(PythonParser.DescendantSelectorContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code idSelector}
+	 * labeled alternative in {@link PythonParser#cssSelector}.
+	 * @param ctx the parse tree
+	 */
+	void enterIdSelector(PythonParser.IdSelectorContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code idSelector}
+	 * labeled alternative in {@link PythonParser#cssSelector}.
+	 * @param ctx the parse tree
+	 */
+	void exitIdSelector(PythonParser.IdSelectorContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code classSelector}
+	 * labeled alternative in {@link PythonParser#cssSelector}.
+	 * @param ctx the parse tree
+	 */
+	void enterClassSelector(PythonParser.ClassSelectorContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code classSelector}
+	 * labeled alternative in {@link PythonParser#cssSelector}.
+	 * @param ctx the parse tree
+	 */
+	void exitClassSelector(PythonParser.ClassSelectorContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code simpleSelector}
+	 * labeled alternative in {@link PythonParser#cssSelector}.
+	 * @param ctx the parse tree
+	 */
+	void enterSimpleSelector(PythonParser.SimpleSelectorContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code simpleSelector}
+	 * labeled alternative in {@link PythonParser#cssSelector}.
+	 * @param ctx the parse tree
+	 */
+	void exitSimpleSelector(PythonParser.SimpleSelectorContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PythonParser#selectorName}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelectorName(PythonParser.SelectorNameContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PythonParser#selectorName}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelectorName(PythonParser.SelectorNameContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link PythonParser#cssKeyValue}.
 	 * @param ctx the parse tree
@@ -1076,83 +1202,63 @@ public interface PythonParserListener extends ParseTreeListener {
 	 */
 	void exitCssKeyValue(PythonParser.CssKeyValueContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link PythonParser#cssKey}.
-	 * @param ctx the parse tree
-	 */
-	void enterCssKey(PythonParser.CssKeyContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link PythonParser#cssKey}.
-	 * @param ctx the parse tree
-	 */
-	void exitCssKey(PythonParser.CssKeyContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code cssVNumber}
+	 * Enter a parse tree produced by the {@code cssHexValue}
 	 * labeled alternative in {@link PythonParser#cssValue}.
 	 * @param ctx the parse tree
 	 */
-	void enterCssVNumber(PythonParser.CssVNumberContext ctx);
+	void enterCssHexValue(PythonParser.CssHexValueContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code cssVNumber}
+	 * Exit a parse tree produced by the {@code cssHexValue}
 	 * labeled alternative in {@link PythonParser#cssValue}.
 	 * @param ctx the parse tree
 	 */
-	void exitCssVNumber(PythonParser.CssVNumberContext ctx);
+	void exitCssHexValue(PythonParser.CssHexValueContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code cssVId}
+	 * Enter a parse tree produced by the {@code cssNumValue}
 	 * labeled alternative in {@link PythonParser#cssValue}.
 	 * @param ctx the parse tree
 	 */
-	void enterCssVId(PythonParser.CssVIdContext ctx);
+	void enterCssNumValue(PythonParser.CssNumValueContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code cssVId}
+	 * Exit a parse tree produced by the {@code cssNumValue}
 	 * labeled alternative in {@link PythonParser#cssValue}.
 	 * @param ctx the parse tree
 	 */
-	void exitCssVId(PythonParser.CssVIdContext ctx);
+	void exitCssNumValue(PythonParser.CssNumValueContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code cssVColor}
+	 * Enter a parse tree produced by the {@code cssIdValue}
 	 * labeled alternative in {@link PythonParser#cssValue}.
 	 * @param ctx the parse tree
 	 */
-	void enterCssVColor(PythonParser.CssVColorContext ctx);
+	void enterCssIdValue(PythonParser.CssIdValueContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code cssVColor}
+	 * Exit a parse tree produced by the {@code cssIdValue}
 	 * labeled alternative in {@link PythonParser#cssValue}.
 	 * @param ctx the parse tree
 	 */
-	void exitCssVColor(PythonParser.CssVColorContext ctx);
+	void exitCssIdValue(PythonParser.CssIdValueContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code cssVStr}
+	 * Enter a parse tree produced by the {@code cssStrValue}
 	 * labeled alternative in {@link PythonParser#cssValue}.
 	 * @param ctx the parse tree
 	 */
-	void enterCssVStr(PythonParser.CssVStrContext ctx);
+	void enterCssStrValue(PythonParser.CssStrValueContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code cssVStr}
+	 * Exit a parse tree produced by the {@code cssStrValue}
 	 * labeled alternative in {@link PythonParser#cssValue}.
 	 * @param ctx the parse tree
 	 */
-	void exitCssVStr(PythonParser.CssVStrContext ctx);
+	void exitCssStrValue(PythonParser.CssStrValueContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code cssVJinja}
+	 * Enter a parse tree produced by the {@code cssJinjaValue}
 	 * labeled alternative in {@link PythonParser#cssValue}.
 	 * @param ctx the parse tree
 	 */
-	void enterCssVJinja(PythonParser.CssVJinjaContext ctx);
+	void enterCssJinjaValue(PythonParser.CssJinjaValueContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code cssVJinja}
+	 * Exit a parse tree produced by the {@code cssJinjaValue}
 	 * labeled alternative in {@link PythonParser#cssValue}.
 	 * @param ctx the parse tree
 	 */
-	void exitCssVJinja(PythonParser.CssVJinjaContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link PythonParser#cssComment}.
-	 * @param ctx the parse tree
-	 */
-	void enterCssComment(PythonParser.CssCommentContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link PythonParser#cssComment}.
-	 * @param ctx the parse tree
-	 */
-	void exitCssComment(PythonParser.CssCommentContext ctx);
+	void exitCssJinjaValue(PythonParser.CssJinjaValueContext ctx);
 }

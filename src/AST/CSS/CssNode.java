@@ -5,31 +5,41 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CssNode extends ASTNode {
-    private ASTNode selector;
+    private ASTNode ancestor;
+    private ASTNode descendant;
     private List<CssPropertyNode> properties = new ArrayList<>();
 
-    public CssNode(ASTNode selector) {
-        this.selector = selector;
-    }
-
-    public void setSelector(ASTNode selector) {
-        this.selector = selector;
+    public CssNode(ASTNode ancestor, ASTNode descendant) {
+        this.ancestor = ancestor;
+        this.descendant = descendant;
     }
 
     public void addProperty(CssPropertyNode property) {
         this.properties.add(property);
     }
 
-    public void setProperties(List<CssPropertyNode> properties) {
-        this.properties = properties;
+    public ASTNode getAncestor() {
+        return ancestor;
+    }
+
+    public void setAncestor(ASTNode ancestor) {
+        this.ancestor = ancestor;
+    }
+
+    public ASTNode getDescendant() {
+        return descendant;
+    }
+
+    public void setDescendant(ASTNode descendant) {
+        this.descendant = descendant;
     }
 
     public List<CssPropertyNode> getProperties() {
         return properties;
     }
 
-    public ASTNode getSelector() {
-        return selector;
+    public void setProperties(List<CssPropertyNode> properties) {
+        this.properties = properties;
     }
 
     @Override
@@ -42,12 +52,12 @@ public class CssNode extends ASTNode {
 
         String childPrefix = prefix + (isTail ? "    " : "│   ");
 
-        if (selector != null) {
+        if (descendant != null) {
             sb.append(childPrefix)
-                    .append("├── Selector: ")
-                    .append(selector.getClass().getSimpleName())
+                    .append("├── Descendant: ")
+                    .append(descendant.getClass().getSimpleName())
                     .append("(")
-                    .append(selector.toString().trim())
+                    .append(descendant.toString().trim())
                     .append(")\n");
         }
 

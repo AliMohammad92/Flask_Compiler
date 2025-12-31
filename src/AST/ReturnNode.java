@@ -1,31 +1,38 @@
 package AST;
 
-import org.antlr.runtime.tree.TreeWizard;
+import java.util.List;
 
 public class ReturnNode extends ASTNode {
-    private ASTNode value;
+    private List<ASTNode> values;
 
-    public ReturnNode(ASTNode value) {
-        this.value = value;
+    public ReturnNode(List<ASTNode> values) {
+        this.values = values;
     }
 
-    public ASTNode getValue() {
-        return value;
+    public List<ASTNode> getValues() {
+        return values;
     }
 
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
         sb.append(formatLine(prefix, isTail, "ReturnNode"));
-        if (value != null)
-            sb.append(value.toTreeString(nextPrefix(prefix, true), true));
+
+        if (values != null && !values.isEmpty()) {
+            for (int i = 0; i < values.size(); i++) {
+                ASTNode v = values.get(i);
+                boolean last = (i == values.size() - 1);
+                sb.append(v.toTreeString(nextPrefix(prefix, !last), last));
+            }
+        }
+
         return sb.toString();
     }
 
     @Override
     public String toString() {
         return "ReturnNode{" +
-                "value=" + value +
+                "values=" + values +
                 '}';
     }
 }

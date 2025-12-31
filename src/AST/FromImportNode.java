@@ -27,6 +27,4 @@ public class FromImportNode extends ASTNode {
 
         return sb.toString();
     }
-
-
 }

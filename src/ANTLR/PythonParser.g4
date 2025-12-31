@@ -8,11 +8,11 @@ program
     ;
 // ------------------- Statements -------------------
 statement
-    : simpleStatement (SEMI simpleStatement)*
+    : jinjaBody
     | compoundStatement
-    | html
     | css
-    | jinjaBody
+    | simpleStatement (SEMI simpleStatement)*
+    | html
     ;
 
 simpleStatement
@@ -148,17 +148,18 @@ importSyntax
     ;
 
 fromImport
-    : FROM IDENTIFIER IMPORT importedNames #idFromImport
-    | FROM STRING IMPORT importedNames     #strFromImport
+    : FROM importSource IMPORT importList
     ;
 
-importedNames
-    : importsAliases (COMMA importsAliases)*
+importSource
+    : IDENTIFIER #idFromImport
+    | STRING     #strFromImport
     ;
 
-importsAliases
+importList
     : IDENTIFIER (AS IDENTIFIER)?
     ;
+
 
 
 // ------------------- Print Statement -------------------
@@ -211,7 +212,12 @@ parameter
     : IDENTIFIER (ASSIGN value)?;
 
 returnStatement
-    : RETURN value?
+    : RETURN tripleString                     #returnTripleString
+    | RETURN value (COMMA value)              #returnValue
+    ;
+
+tripleString
+    : TRIPLE_STRING
     ;
 
 functionCall
@@ -270,50 +276,50 @@ jinjaStatementContent
     ;
 
 jinjaIfStatements
-    : jinjaIf (jinjaElif)* (jinjaElse)? STMT_START ENDIF STMT_END;
+    : jinjaIf (jinjaElif)* (jinjaElse)? STMT_START JINJA_ENDIF STMT_END;
 
 jinjaIf
-    : IF condition=expressions STMT_END templateBody
+    : JINJA_IF condition=expressions STMT_END templateBody
     ;
 
 jinjaElif
-    : STMT_START ELIF condition=expressions STMT_END templateBody
+    : STMT_START JINJA_ELIF condition=expressions STMT_END templateBody
     ;
 
 jinjaElse
-    : STMT_START ELSE STMT_END templateBody
+    : STMT_START JINJA_ELSE STMT_END templateBody
     ;
 
 jinjaFor
-    : FOR IDENTIFIER IN value STMT_END templateBody STMT_START ENDFOR STMT_END
+    : JINJA_FOR IDENTIFIER IN value STMT_END templateBody STMT_START JINJA_ENDFOR STMT_END
     ;
 
 jinjaSet
-    : SET IDENTIFIER ASSIGN expressions STMT_END
+    : JINJA_SET IDENTIFIER ASSIGN expressions STMT_END
     ;
 
 jiniaExtends
-    : EXTENDS atom STMT_END;
+    : JINJA_EXTENDS atom STMT_END;
 
 jinjaInclude
-    : INCLUDE atom
-      (IGNORE MISSING)?
-      ((WITH | WITHOUT) CONTEXT)?
+    : JINJA_INCLUDE atom
+      (JINJA_IGNORE JINJA_MISSING)?
+      ((JINJA_WITH | JINJA_WITHOUT) JINJA_CONTEXT)?
       STMT_END
     ;
 
 
 jinjaBlock
-    : BLOCK IDENTIFIER STMT_END templateBody STMT_START ENDBLOCK (IDENTIFIER)? STMT_END
+    : JINJA_BLOCK IDENTIFIER STMT_END templateBody STMT_START JINJA_ENDBLOCK (IDENTIFIER)? STMT_END
     ;
 
 jinjaLocalVariable
-    : WITH IDENTIFIER ASSIGN expressions STMT_END templateBody STMT_START ENDWITH STMT_END
+    : JINJA_WITH IDENTIFIER ASSIGN expressions STMT_END templateBody STMT_START JINJA_ENDWITH STMT_END
     ;
 
 // --- Template Body ---
 templateBody
-    : (html | jinjaBody | statement)*
+    : (htmlElement | jinjaBody | statement)*
     ;
 
 // ------------------- FLASK -------------------
@@ -323,12 +329,13 @@ templateBody
 
 // ------------------- HTML -------------------
 html
-    : htmlElement+
+    : HTML_START htmlElement* HTML_END
     ;
 
 htmlElement
     : htmlTag
     | selfClosingTag
+    | jinjaBody
     | htmlText
     ;
 
@@ -338,70 +345,68 @@ htmlTag
     ;
 
 styleTag
-    : LT STYLE htmlAttributes* GT css* LT SLASH STYLE GT
+    : HTML_STYLE_START css* STYLE_END
     ;
 
 genericHtml
-    : LT IDENTIFIER htmlAttributes* GT htmlBody? LT SLASH IDENTIFIER GT
+    : TAG_OPEN name=HTML_TAG_NAME htmlAttributes* TAG_CLOSE
+      (htmlElement | HTML_TEXT)*
+      TAG_OPEN TAG_SLASH HTML_TAG_NAME TAG_CLOSE
     ;
 
 selfClosingTag
-    : LT IDENTIFIER htmlAttributes* SLASH GT
+    : TAG_OPEN HTML_TAG_NAME htmlAttributes* TAG_SLASH TAG_CLOSE
     ;
 
 htmlAttributes
-    : attributeName ASSIGN attributeValue
-    ;
-
-attributeName
-    : IDENTIFIER
-    | CLASS
+    : (HTML_ATTR_NAME | CLASS | IDENTIFIER) HTML_ASSIGN attributeValue
     ;
 
 attributeValue
-    : STRING
-    ;
-
-htmlBody
-    : (htmlElement
-    | htmlText
-    | jinjaBody
-    )+
+    : HTML_QUOTED_STRING | STRING | NUMBER
     ;
 
 htmlText
-    : (IDENTIFIER
-    | STRING
-    | jinjaExpression
-    )+
+    : HTML_TEXT          #normalText
+    | HTML_QUOTED_STRING #quotedText
+    | HTML_TAG_NAME      #tagAsText
+    | HTML_ATTR_NAME     #attrAsText
+    | IDENTIFIER         #idAsText
+    | CLASS              #classAsText
+    | jinjaExpression    #jinjaAsText
     ;
-
+//htmlText
+//    : ( parts+=HTML_TEXT
+//      | parts+=HTML_QUOTED_STRING
+//      | parts+=HTML_TAG_NAME
+//      | parts+=IDENTIFIER
+//      | jinjaExpression
+//      )+
+//    ;
 // ------------------- CSS -------------------
 css
-    : cssSelector (COMMA cssSelector)* LCBRACK (cssKeyValue)* RCBRACK
-    | cssComment
+    : cssSelector CSS_PROPERTY_START cssKeyValue* CSS_PROPERTY_END
     ;
 
 cssSelector
-    : (DOT | HASHTAG)? cssKey (COLON cssKey)*
+    : DOT selectorName                             #classSelector
+    | HASHTAG selectorName                         #idSelector
+    | selectorName                                 #simpleSelector
+    | left=cssSelector CSS_WS right=cssSelector    #descendantSelector
+    ;
+
+selectorName
+    : CSS_ID (MINUS CSS_ID)*
     ;
 
 cssKeyValue
-    : cssKey COLON cssValue SEMI?
-    ;
-
-cssKey
-    : IDENTIFIER (MINUS IDENTIFIER?)*
+    : CSS_ID CSS_COLON cssValue CSS_SEMI?
     ;
 
 cssValue
-    : NUMBER (TYPE)?                    #cssVNumber
-    | IDENTIFIER                        #cssVId
-    | HASHTAG_VALUE                     #cssVColor
-    | STRING                            #cssVStr
-    | jinjaExpression                   #cssVJinja
-    ;
-
-cssComment
-    : CSS_COM_S (.)? CSS_COM_E
+    : CSS_HEX                   #cssHexValue
+    | CSS_NUMBER (CSS_TYPE)?    #cssNumValue
+    | CSS_ID                    #cssIdValue
+    | STRING                    #cssStrValue
+    | jinjaExpression           #cssJinjaValue
     ;

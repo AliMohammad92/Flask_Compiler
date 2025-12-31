@@ -44,12 +44,9 @@ import java.util.*;
 }
 
 // --- Template Delimiters ---
-EXPR_START : '{{' ;
-EXPR_END   : '}}' ;
-STMT_START : '{%' ;
-STMT_END   : '%}' ;
-COMMENT_START : '{#' ;
-COMMENT_END   : '#}' ;
+EXPR_START    : '{{' -> pushMode(JINJA_MODE);
+STMT_START    : '{%' -> pushMode(JINJA_MODE);
+COMMENT_START : '{#' -> pushMode(JINJA_MODE);
 
 // ------------------- Keywords -------------------
 IMPORT     : 'import';
@@ -82,19 +79,6 @@ AS         : 'as';
 SET        : 'set';
 PIPE       : '|';
 GLOBAL     : 'global';
-// ------------------- JINJA2 -------------------
-INCLUDE    : 'include';
-EXTENDS    : 'extends';
-ENDIF      : 'endif';
-ENDFOR     : 'endfor';
-IGNORE     : 'ignore';
-MISSING    : 'missing';
-WITH       : 'with';
-ENDWITH    : 'endwith';
-WITHOUT    : 'without';
-CONTEXT    : 'context';
-BLOCK      : 'block';
-ENDBLOCK   : 'endblock';
 
 // ------------------- Operators -------------------
 PLUS       : '+';
@@ -114,8 +98,6 @@ ASSIGN     : '=';
 AND        : '&&';
 OR         : '||';
 
-
-
 // ------------------- Symbols -------------------
 LPAREN     : '(';
 RPAREN     : ')';
@@ -127,20 +109,10 @@ COLON      : ':';
 SEMI       : ';';
 COMMA      : ',';
 DOT        : '.';
-HASHTAG_VALUE : '#' [a-fA-F0-9]+ ;
 HASHTAG    : '#';
 AT         : '@';
-
-CSS_COM_S  : '/*';
-CSS_COM_E  : '*/';
-
 // ----------------- HTML & CSS -------------------
-//HTML_TAG            : LT IDENTIFIER GT;
-//HTML_CLOSE_TAG      : LT SLASH IDENTIFIER GT;
-STYLE : 'style';
-TYPE
-    : ('px' | 'em' | 'rem' | '%' | 'vh' | 'vw' | 'deg' | 's' | 'ms')
-    ;
+HTML_START  : '<html>'  -> pushMode(HTML_MODE);
 
 // ------------------- Literals -------------------
 NUMBER
@@ -152,6 +124,9 @@ STRING
     | '\'' (~['\\] | '\\' .)* '\''
     ;
 
+TRIPLE_STRING
+    : '"""' .*? '"""'
+    ;
 // ------------------- Identifiers -------------------
 
 IDENTIFIER
@@ -164,3 +139,118 @@ COMMENT
     ;
 
 WS : [ \t\r\n]+ -> skip;
+
+
+mode JINJA_MODE;
+    EXPR_END : '}}' -> popMode;
+    STMT_END : '%}' -> popMode;
+    COMMENT_END : '#}' -> popMode;
+
+    JINJA_PIPE : '|' ;
+    JINJA_DOT : '.' ;
+    JINJA_LPAREN : '(' ;
+    JINJA_RPAREN : ')' ;
+    JINJA_COMMA : ',' ;
+    JINJA_COLON : ':' ;
+    JINJA_ASSIGN : '=' -> type(ASSIGN);
+
+    // Keywords
+    JINJA_IF : 'if' ;
+    JINJA_ELIF : 'elif' ;
+    JINJA_ELSE : 'else' ;
+    JINJA_ENDIF : 'endif' ;
+    JINJA_FOR : 'for' ;
+    JINJA_ENDFOR : 'endfor' ;
+    JINJA_SET : 'set' ;
+    JINJA_BLOCK : 'block' ;
+    JINJA_ENDBLOCK : 'endblock' ;
+    JINJA_EXTENDS : 'extends' ;
+    JINJA_INCLUDE : 'include' ;
+    JINJA_IGNORE  : 'ignore';
+    JINJA_MISSING : 'missing';
+    JINJA_WITH : 'with';
+    JINJA_ENDWITH : 'endwith';
+    JINJA_WITHOUT : 'without';
+    JINJA_CONTEXT : 'context';
+    JINJA_IN      : 'in'  -> type(IN);
+    JINJA_IS      : 'is'  -> type(IS);
+
+
+    JINJA_IDENTIFIER : [a-zA-Z_][a-zA-Z_0-9]*  -> type(IDENTIFIER);
+    JINJA_STRING : ('"' (~["\\] | '\\' .)* '"' | '\'' (~['\\] | '\\' .)* '\'') -> type(STRING);
+    JINJA_NUMBER : [0-9]+ ('.' [0-9]+)? -> type(NUMBER);
+
+    JINJA_TRUE  : 'True'  -> type(TRUE);
+    JINJA_FALSE : 'False' -> type(FALSE);
+    JINJA_NONE  : 'None'  -> type(NONE);
+
+    // --- Comparison Operators ---
+    J_LT         : '<'   -> type(LT);
+    J_GT         : '>'   -> type(GT);
+    J_LTE        : '<='  -> type(LTE);
+    J_GTE        : '>='  -> type(GTE);
+    J_EQUAL      : '=='  -> type(EQUAL);
+    J_NEQ        : '!='  -> type(NEQ);
+    J_STRICT_EQ  : '===' -> type(STRICT_EQ);
+    J_STRICT_NEQ : '!==' -> type(STRICT_NEQ);
+
+    // --- Mathematical Operators ---
+    J_PLUS       : '+'   -> type(PLUS);
+    J_MINUS      : '-'   -> type(MINUS);
+    J_MULTIPLY   : '*'   -> type(MULTIPLY);
+    J_SLASH      : '/'   -> type(SLASH);
+    J_MOD        : '%'   -> type(MOD);
+
+    // --- Logical Operators (Jinja-style) ---
+    J_AND_WORD   : 'and' -> type(S_AND);
+    J_OR_WORD    : 'or'  -> type(S_OR);
+    J_NOT_WORD   : 'not' -> type(NOT);
+
+    J_AND_SYM    : '&&'  -> type(AND);
+    J_OR_SYM     : '||'  -> type(OR);
+
+    JINJA_WS : [ \t\r\n]+ -> skip ;
+    //JINJA_COMMENT : . -> skip ;
+
+mode CSS_MODE;
+    CSS_WS : [ \t\r\n]+ -> skip;
+    CSS_PROPERTY_START : '{' ;
+    CSS_PROPERTY_END : '}' ;
+    CSS_COLON : ':' ;
+    CSS_SEMI : ';' ;
+    CSS_NUMBER : ('+'|'-')? [0-9]+ ('.' [0-9]+)? ;
+    CSS_TYPE   : ('px' | 'em' | 'rem' | '%' | 'vh' | 'vw' | 'deg' | 's' | 'ms') ;
+    CSS_COM_S  : '/*';
+    CSS_COM_E  : '*/';
+
+    STYLE_END : '</style>' -> popMode;
+
+    CSS_ID : [a-zA-Z_][a-zA-Z_\-0-9]* ;
+    CSS_HEX : '#' [a-fA-F0-9]+ ;
+
+    CSS_UNKOWN: . -> popMode;
+
+mode HTML_MODE;
+
+    HTML_EXPR_START  : '{{' -> type(EXPR_START), pushMode(JINJA_MODE);
+    HTML_STMT_START  : '{%' -> type(STMT_START), pushMode(JINJA_MODE);
+
+    HTML_STYLE_START : '<style>' -> pushMode(CSS_MODE);
+    HTML_END         : '</html>' -> popMode;
+
+    TAG_OPEN         : '<';
+    TAG_CLOSE        : '>';
+    TAG_SLASH        : '/';
+    HTML_ASSIGN      : '=';
+
+    HTML_QUOTED_STRING : '"' (~["\\] | '\\' .)* '"'
+                       | '\'' (~['\\] | '\\' .)* '\''
+                       ;
+
+    HTML_CLASS       : 'class' -> type(CLASS);
+    HTML_TAG_NAME    : [a-zA-Z][a-zA-Z0-9]*;
+    HTML_ATTR_NAME   : [a-zA-Z_][a-zA-Z0-9_-]*;
+
+    HTML_TEXT : ~[<>{}/ \t\r\n]+ ;
+
+    HTML_WS          : [ \t\r\n]+ -> skip;

@@ -581,6 +581,18 @@ public class PythonParserBaseListener implements PythonParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterFromImport(PythonParser.FromImportContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFromImport(PythonParser.FromImportContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterIdFromImport(PythonParser.IdFromImportContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -605,25 +617,13 @@ public class PythonParserBaseListener implements PythonParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterImportedNames(PythonParser.ImportedNamesContext ctx) { }
+	@Override public void enterImportList(PythonParser.ImportListContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitImportedNames(PythonParser.ImportedNamesContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterImportsAliases(PythonParser.ImportsAliasesContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitImportsAliases(PythonParser.ImportsAliasesContext ctx) { }
+	@Override public void exitImportList(PythonParser.ImportListContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -773,13 +773,37 @@ public class PythonParserBaseListener implements PythonParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterReturnStatement(PythonParser.ReturnStatementContext ctx) { }
+	@Override public void enterReturnTripleString(PythonParser.ReturnTripleStringContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitReturnStatement(PythonParser.ReturnStatementContext ctx) { }
+	@Override public void exitReturnTripleString(PythonParser.ReturnTripleStringContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterReturnValue(PythonParser.ReturnValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitReturnValue(PythonParser.ReturnValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTripleString(PythonParser.TripleStringContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTripleString(PythonParser.TripleStringContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1133,18 +1157,6 @@ public class PythonParserBaseListener implements PythonParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterAttributeName(PythonParser.AttributeNameContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitAttributeName(PythonParser.AttributeNameContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterAttributeValue(PythonParser.AttributeValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -1157,25 +1169,85 @@ public class PythonParserBaseListener implements PythonParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterHtmlBody(PythonParser.HtmlBodyContext ctx) { }
+	@Override public void enterNormalText(PythonParser.NormalTextContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitHtmlBody(PythonParser.HtmlBodyContext ctx) { }
+	@Override public void exitNormalText(PythonParser.NormalTextContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterHtmlText(PythonParser.HtmlTextContext ctx) { }
+	@Override public void enterQuotedText(PythonParser.QuotedTextContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitHtmlText(PythonParser.HtmlTextContext ctx) { }
+	@Override public void exitQuotedText(PythonParser.QuotedTextContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTagAsText(PythonParser.TagAsTextContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTagAsText(PythonParser.TagAsTextContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAttrAsText(PythonParser.AttrAsTextContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAttrAsText(PythonParser.AttrAsTextContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIdAsText(PythonParser.IdAsTextContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIdAsText(PythonParser.IdAsTextContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterClassAsText(PythonParser.ClassAsTextContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitClassAsText(PythonParser.ClassAsTextContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterJinjaAsText(PythonParser.JinjaAsTextContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitJinjaAsText(PythonParser.JinjaAsTextContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1193,13 +1265,61 @@ public class PythonParserBaseListener implements PythonParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCssSelector(PythonParser.CssSelectorContext ctx) { }
+	@Override public void enterDescendantSelector(PythonParser.DescendantSelectorContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCssSelector(PythonParser.CssSelectorContext ctx) { }
+	@Override public void exitDescendantSelector(PythonParser.DescendantSelectorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIdSelector(PythonParser.IdSelectorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIdSelector(PythonParser.IdSelectorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterClassSelector(PythonParser.ClassSelectorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitClassSelector(PythonParser.ClassSelectorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSimpleSelector(PythonParser.SimpleSelectorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSimpleSelector(PythonParser.SimpleSelectorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSelectorName(PythonParser.SelectorNameContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSelectorName(PythonParser.SelectorNameContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1217,85 +1337,61 @@ public class PythonParserBaseListener implements PythonParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCssKey(PythonParser.CssKeyContext ctx) { }
+	@Override public void enterCssHexValue(PythonParser.CssHexValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCssKey(PythonParser.CssKeyContext ctx) { }
+	@Override public void exitCssHexValue(PythonParser.CssHexValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCssVNumber(PythonParser.CssVNumberContext ctx) { }
+	@Override public void enterCssNumValue(PythonParser.CssNumValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCssVNumber(PythonParser.CssVNumberContext ctx) { }
+	@Override public void exitCssNumValue(PythonParser.CssNumValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCssVId(PythonParser.CssVIdContext ctx) { }
+	@Override public void enterCssIdValue(PythonParser.CssIdValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCssVId(PythonParser.CssVIdContext ctx) { }
+	@Override public void exitCssIdValue(PythonParser.CssIdValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCssVColor(PythonParser.CssVColorContext ctx) { }
+	@Override public void enterCssStrValue(PythonParser.CssStrValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCssVColor(PythonParser.CssVColorContext ctx) { }
+	@Override public void exitCssStrValue(PythonParser.CssStrValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCssVStr(PythonParser.CssVStrContext ctx) { }
+	@Override public void enterCssJinjaValue(PythonParser.CssJinjaValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCssVStr(PythonParser.CssVStrContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterCssVJinja(PythonParser.CssVJinjaContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitCssVJinja(PythonParser.CssVJinjaContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterCssComment(PythonParser.CssCommentContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitCssComment(PythonParser.CssCommentContext ctx) { }
+	@Override public void exitCssJinjaValue(PythonParser.CssJinjaValueContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

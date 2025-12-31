@@ -3,13 +3,19 @@ package AST;
 import AST.CSS.CssBlockNode;
 import AST.CSS.CssNode;
 import AST.CSS.CssPropertyNode;
+import AST.Flask.FlaskDecoratorNode;
+import AST.Flask.RenderTemplateNode;
 import AST.HTML.HtmlElementNode;
 import AST.HTML.HtmlTextNode;
 import AST.JINJA2.*;
 import SymbolTable.SymbolTable;
 import SymbolTable.Symbol;
+import gen.ANTLR.PythonLexer;
 import gen.ANTLR.PythonParser;
 import gen.ANTLR.PythonParserBaseVisitor;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.*;
@@ -168,31 +174,6 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         return null;
     }
 
-    private List<ASTNode> collectBodyElements(PythonParser.HtmlBodyContext ctx) {
-        List<ASTNode> elements = new ArrayList<>();
-
-        if (ctx == null) return elements;
-
-        if (ctx.htmlElement() != null) {
-            for (var childCtx : ctx.htmlElement()) {
-                ASTNode node = (ASTNode) visit(childCtx);
-                if (node != null) {
-                    elements.add(node);
-                }
-            }
-        }
-
-        if (ctx.htmlText() != null) {
-            for (var childCtx : ctx.htmlText()) {
-                ASTNode node = visit(childCtx);
-                if (node != null) {
-                    elements.add(node);
-                }
-            }
-        }
-        return elements;
-    }
-
     private Map.Entry<String, ASTNode> getJsonData(PythonParser.JsonDataContext ctx) {
         String key = ctx.STRING().getText().replace("\"", "");
         ASTNode value = visit(ctx.value());
@@ -233,54 +214,41 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
     }
 
     @Override
-    public ASTNode visitIdFromImport(PythonParser.IdFromImportContext ctx) {
-        ASTNode name = new IdentifierNode(ctx.IDENTIFIER().toString());
-        ASTNode importedList = visit(ctx.importedNames());
+    public ASTNode visitFromImport(PythonParser.FromImportContext ctx) {
+        ASTNode sourceNode = visit(ctx.importSource());
+        ASTNode importedListNode = visit(ctx.importList());
+        return new FromImportNode(sourceNode, importedListNode);
+    }
 
-        return new FromImportNode(name, importedList);
+    @Override
+    public ASTNode visitIdFromImport(PythonParser.IdFromImportContext ctx) {
+        return new IdentifierNode(ctx.IDENTIFIER().getText());
     }
 
     @Override
     public ASTNode visitStrFromImport(PythonParser.StrFromImportContext ctx) {
-        ASTNode name = new StringNode(ctx.STRING().getText());
-        ASTNode importedList = visit(ctx.importedNames());
-
-        return new FromImportNode(name, importedList);
+        return new StringNode(ctx.STRING().getText());
     }
 
     @Override
-    public ASTNode visitImportedNames(PythonParser.ImportedNamesContext ctx) {
+    public ASTNode visitImportList(PythonParser.ImportListContext ctx) {
         List<ASTNode> imports = new ArrayList<>();
-        for (PythonParser.ImportsAliasesContext aliasCtx : ctx.importsAliases()) {
-            imports.add(visit(aliasCtx));
+        for (var id : ctx.IDENTIFIER()) {
+            String name = id.getText();
+            IdentifierNode nameNode = new IdentifierNode(name);
+
+            Symbol symbol = new Symbol(
+                    name,
+                    Symbol.SymbolType.IDENTIFIER,
+                    IdentifierNode.class.getSimpleName(),
+                    "Imported",
+                    ctx.start.getLine()
+            );
+            table.define(symbol);
+
+            imports.add(nameNode);
         }
         return new ImportedListNode(imports);
-    }
-
-    @Override
-    public ASTNode visitImportsAliases(PythonParser.ImportsAliasesContext ctx) {
-        String originalName = ctx.IDENTIFIER(0).getText();
-        ASTNode nameNode = new IdentifierNode(originalName);
-
-        ASTNode aliasNode = null;
-        String symbolName = originalName;
-
-        if (ctx.IDENTIFIER().size() > 1) {
-            String aliasName = ctx.IDENTIFIER(1).getText();
-            aliasNode = new IdentifierNode(aliasName);
-            symbolName = aliasName;
-        }
-        ASTNode importedNameNode = new ImportedNode(nameNode, aliasNode);
-
-        Symbol symbol = new Symbol(
-                symbolName,
-                Symbol.SymbolType.IDENTIFIER,
-                ImportedNode.class.getSimpleName(),
-                "ImportedFunction",
-                ctx.start.getLine()
-        );
-        table.define(symbol);
-        return importedNameNode;
     }
 
     // =========================
@@ -552,12 +520,31 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
     }
 
     @Override
-    public ASTNode visitReturnStatement(PythonParser.ReturnStatementContext ctx) {
-        ReturnNode returnNode = null;
+    public ASTNode visitReturnValue(PythonParser.ReturnValueContext ctx) {
+        List<ASTNode> values = new ArrayList<>();
         if (ctx.value() != null) {
-            returnNode = new ReturnNode(visit(ctx.value()));
+            for (PythonParser.ValueContext val : ctx.value())
+                values.add(visit(val));
         }
-        return returnNode;
+        return new ReturnNode(values);
+    }
+
+    @Override
+    public ASTNode visitReturnTripleString(PythonParser.ReturnTripleStringContext ctx) {
+        String htmlContent = ctx.tripleString().getText();
+        htmlContent = htmlContent.substring(3, htmlContent.length() - 3);
+        boolean isHtml = htmlContent.contains("<") && htmlContent.contains(">");
+        if (isHtml) {
+            System.out.println("HTML");
+//            CharStream input = CharStreams.fromString(htmlContent);
+//            PythonLexer lexer = new PythonLexer(input);
+//            CommonTokenStream tokens = new CommonTokenStream(lexer);
+//            PythonParser parser = new PythonParser(tokens);
+//            ParseTree tree = parser.htmlBody();
+//            ASTNode htmlAST = visit(tree);
+//            return new ReturnNode(Collections.singletonList(htmlAST));
+        }
+        return new ReturnNode(Collections.singletonList(new StringNode(htmlContent)));
     }
 
     @Override
@@ -678,30 +665,14 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitTemplateBody(PythonParser.TemplateBodyContext ctx) {
-        ProgramNode block = new ProgramNode();
-
-        // Handle statements
-        for (PythonParser.StatementContext stmtCtx : ctx.statement()) {
-            ASTNode stmtNode = visit(stmtCtx);
-            if (stmtNode != null)
-                block.addStatement(stmtNode);
+        ProgramNode body = new ProgramNode();
+        for (int i = 0; i < ctx.getChildCount(); i++) {
+            ASTNode node = visit(ctx.getChild(i));
+            if (node != null) {
+                body.addStatement(node);
+            }
         }
-
-        // Handle HTML elements
-        for (PythonParser.HtmlContext htmlCtx : ctx.html()) {
-            ASTNode htmlNode = visit(htmlCtx);
-            if (htmlNode != null)
-                block.addStatement(htmlNode);
-        }
-
-        // Handle Jinja body elements
-        for (PythonParser.JinjaBodyContext jinjaCtx : ctx.jinjaBody()) {
-            ASTNode jinjaNode = visit(jinjaCtx);
-            if (jinjaNode != null)
-                block.addStatement(jinjaNode);
-        }
-
-        return block;
+        return body;
     }
 
     @Override
@@ -806,15 +777,15 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitJinjaInclude(PythonParser.JinjaIncludeContext ctx) {
         ASTNode template = visit(ctx.atom());
-        boolean ignoreMissing = ctx.IGNORE() != null;
-        boolean withContext = ctx.WITH() != null;
+        boolean ignoreMissing = ctx.JINJA_IGNORE() != null;
+        boolean withContext = ctx.JINJA_WITH() != null;
         return new IncludeNode(template, ignoreMissing, withContext);
     }
+
 
     // =========================
     // HTML
     // =========================
-
 
     @Override
     public ASTNode visitHtmlTag(PythonParser.HtmlTagContext ctx) {
@@ -823,146 +794,92 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitStyleTag(PythonParser.StyleTagContext ctx) {
-        HtmlElementNode element = new HtmlElementNode(new IdentifierNode("style"));
-        Map<String, String> attributes = new HashMap<>();
-        for (PythonParser.HtmlAttributesContext attr : ctx.htmlAttributes()) {
-            attributes.put(
-                    attr.attributeName().getText(),
-                    attr.attributeValue().getText()
-            );
+        HtmlElementNode styleNode = new HtmlElementNode(new IdentifierNode("style"));
+        List<ASTNode> cssBlocks = new ArrayList<>();
+        for (var cssCtx : ctx.css()) {
+            cssBlocks.add(visit(cssCtx));
         }
-        element.setAttributes(attributes);
-
-        List<ASTNode> children = new ArrayList<>();
-        for (PythonParser.CssContext css : ctx.css()) {
-            children.add(visit(css));
-        }
-        element.setChildren(children);
-//        element.getBehaviorTable().get(element.getTagName()).render(ctx);
-        return element;
+        styleNode.setChildren(cssBlocks);
+        return styleNode;
     }
 
     @Override
     public ASTNode visitGenericHtml(PythonParser.GenericHtmlContext ctx) {
-        HtmlElementNode element = new HtmlElementNode(new IdentifierNode(ctx.IDENTIFIER(0).getText()));
+        String tagName = ctx.name.getText();
+        HtmlElementNode element = new HtmlElementNode(new IdentifierNode(tagName));
+
         Map<String, String> attributes = new HashMap<>();
-        for (PythonParser.HtmlAttributesContext attr : ctx.htmlAttributes()) {
-            attributes.put(
-                    attr.attributeName().getText(),
-                    attr.attributeValue().getText()
-            );
+        for (var attrCtx : ctx.htmlAttributes()) {
+            String attrName = attrCtx.getChild(0).getText();
+            String attrVal = cleanString(attrCtx.attributeValue().getText());
+            attributes.put(attrName, attrVal);
         }
         element.setAttributes(attributes);
 
         List<ASTNode> children = new ArrayList<>();
-        children.addAll(collectBodyElements(ctx.htmlBody()));
+        for (var childCtx : ctx.htmlElement()) {
+            ASTNode childNode = visit(childCtx);
+            if (childNode != null) {
+                children.add(childNode);
+            }
+        }
         element.setChildren(children);
-//        element.getBehaviorTable().get(element.getTagName()).render(ctx);
         return element;
     }
 
     @Override
     public ASTNode visitHtmlText(PythonParser.HtmlTextContext ctx) {
         StringBuilder text = new StringBuilder();
-        if (ctx.IDENTIFIER() != null) {
-            for (var id : ctx.IDENTIFIER()) {
-                text.append(id.getText());
-            }
-        }
-        if (ctx.STRING() != null) {
-            for (var str : ctx.STRING()) {
-                String clean = cleanString(str.getText());
-                text.append(clean);
+
+        for (int i = 0; i < ctx.getChildCount(); i++) {
+            var child = ctx.getChild(i);
+
+            String childText = child.getText();
+            if (childText.startsWith("\"") || childText.startsWith("'")) {
+                text.append(cleanString(childText));
+            } else {
+                text.append(childText);
             }
         }
         return new HtmlTextNode(text.toString());
     }
-
     // =========================
     // CSS
     // =========================
 
     @Override
     public ASTNode visitCss(PythonParser.CssContext ctx) {
-        List<CssNode> cssNodes = new ArrayList<>();
-        List<CssPropertyNode> properties = new ArrayList<>();
-        for (PythonParser.CssSelectorContext selectorContext : ctx.cssSelector()) {
-            cssNodes.add((CssNode) visit(selectorContext));
-        }
-
-        for (PythonParser.CssKeyValueContext cssKeyValueContext : ctx.cssKeyValue()) {
-            properties.add((CssPropertyNode) visit(cssKeyValueContext));
-        }
-
-        for (CssNode node : cssNodes) {
-            node.setProperties(properties);
-        }
-        return new CssBlockNode(cssNodes);
-    }
-
-    @Override
-    public ASTNode visitCssSelector(PythonParser.CssSelectorContext ctx) {
-        StringBuilder selectorName = new StringBuilder();
-
-        if (ctx.DOT() != null) {
-            selectorName.append(".");
-        } else if (ctx.HASHTAG() != null) {
-            selectorName.append("#");
-        }
-
-        selectorName.append(((IdentifierNode) visit(ctx.cssKey(0))).getName());
-
-        for (int i = 1; i < ctx.cssKey().size(); i++) {
-            selectorName.append(":")
-                    .append(((IdentifierNode) visit(ctx.cssKey(i))).getName());
-        }
-
-        IdentifierNode selector = new IdentifierNode(selectorName.toString());
-        return new CssNode(selector);
-    }
-
-    @Override
-    public ASTNode visitCssKey(PythonParser.CssKeyContext ctx) {
-        StringBuilder id = new StringBuilder();
-        id.append(ctx.IDENTIFIER(0).getText());
-        for (int i = 1; i < ctx.IDENTIFIER().size(); i++) {
-            id.append("-").append(ctx.IDENTIFIER(1).getText());
-        }
-        return new IdentifierNode(id.toString());
+        return super.visitCss(ctx);
     }
 
     @Override
     public ASTNode visitCssKeyValue(PythonParser.CssKeyValueContext ctx) {
-        ASTNode key = visit(ctx.cssKey());
+        ASTNode key = new IdentifierNode(ctx.CSS_ID().getText());
         ASTNode value = visit(ctx.cssValue());
         return new CssPropertyNode(key, value);
     }
 
     @Override
-    public ASTNode visitCssVNumber(PythonParser.CssVNumberContext ctx) {
-        StringBuilder value = new StringBuilder();
-        value.append(ctx.NUMBER().getText());
-        if (ctx.TYPE() != null) {
-            value.append(ctx.TYPE().getText());
-        }
-        return new NumberNode(value.toString());
+    public ASTNode visitCssHexValue(PythonParser.CssHexValueContext ctx) {
+        return new StringNode(ctx.CSS_HEX().getText());
     }
 
     @Override
-    public ASTNode visitCssVId(PythonParser.CssVIdContext ctx) {
-        return new IdentifierNode(ctx.IDENTIFIER().getText());
-    }
-
-    @Override
-    public ASTNode visitCssVColor(PythonParser.CssVColorContext ctx) {
+    public ASTNode visitCssNumValue(PythonParser.CssNumValueContext ctx) {
+        String num = ctx.CSS_NUMBER().getText();
+        String type = ctx.CSS_TYPE().getText();
         StringBuilder sb = new StringBuilder();
-        sb.append('#').append(ctx.HASHTAG_VALUE().getText());
-        return new IdentifierNode(sb.toString());
+        sb.append(num).append(type);
+        return new StringNode(sb.toString());
     }
 
     @Override
-    public ASTNode visitCssVStr(PythonParser.CssVStrContext ctx) {
-        String str = ctx.STRING().getText();
-        return new StringNode(cleanString(str));
+    public ASTNode visitCssIdValue(PythonParser.CssIdValueContext ctx) {
+        return new IdentifierNode(ctx.CSS_ID().getText());
+    }
+
+    @Override
+    public ASTNode visitCssStrValue(PythonParser.CssStrValueContext ctx) {
+        return new StringNode(ctx.STRING().getText());
     }
 }
