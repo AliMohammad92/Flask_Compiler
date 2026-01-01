@@ -23,23 +23,18 @@ public class CssPropertyNode extends ASTNode {
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append(prefix)
-                .append(isTail ? "└── " : "├── ")
-                .append("Property: ");
+        sb.append(formatLine(prefix, isTail, "CssPropertyNode"));
 
-        if (key != null)
-            sb.append(key.toString().trim());
-        else
-            sb.append("null");
+        String newPrefix = nextPrefix(prefix, isTail);
 
-        sb.append(": ");
+        if (key != null) {
+            sb.append(key.toTreeString(newPrefix, false));
+        }
 
-        if (value != null)
-            sb.append(value.toString().trim());
-        else
-            sb.append("null");
+        if (value != null) {
+            sb.append(value.toTreeString(newPrefix, true));
+        }
 
-        sb.append("\n");
         return sb.toString();
     }
 }

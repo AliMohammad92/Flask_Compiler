@@ -46,27 +46,30 @@ public class CssNode extends ASTNode {
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append(prefix)
-                .append(isTail ? "└── " : "├── ")
-                .append("CssNode\n");
+        // 1. طباعة اسم النود الأساسي
+        sb.append(formatLine(prefix, isTail, "CssNode"));
 
-        String childPrefix = prefix + (isTail ? "    " : "│   ");
+        String newPrefix = nextPrefix(prefix, isTail);
 
-        if (descendant != null) {
-            sb.append(childPrefix)
-                    .append("├── Descendant: ")
-                    .append(descendant.getClass().getSimpleName())
-                    .append("(")
-                    .append(descendant.toString().trim())
-                    .append(")\n");
+        // 2. طباعة الـ Ancestor (إذا كان موجوداً - حالة الـ Descendant Selector)
+        if (ancestor != null) {
+            // إذا كان الـ Descendant والـ Properties موجودين، فهذا ليس الأخير
+            boolean isLast = (descendant == null && properties.isEmpty());
+            sb.append(ancestor.toTreeString(newPrefix, isLast));
         }
 
+        // 3. طباعة الـ Descendant (السلكتور الأساسي أو الابن)
+        if (descendant != null) {
+            boolean isLast = properties.isEmpty();
+            sb.append(descendant.toTreeString(newPrefix, isLast));
+        }
+
+        // 4. طباعة قائمة الخصائص
         for (int i = 0; i < properties.size(); i++) {
-            CssPropertyNode prop = properties.get(i);
-            sb.append(prop.toTreeString(childPrefix, i == properties.size() - 1));
+            boolean lastProp = (i == properties.size() - 1);
+            sb.append(properties.get(i).toTreeString(newPrefix, lastProp));
         }
 
         return sb.toString();
     }
-
 }

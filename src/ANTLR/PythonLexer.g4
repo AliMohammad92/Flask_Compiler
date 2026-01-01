@@ -114,6 +114,10 @@ AT         : '@';
 // ----------------- HTML & CSS -------------------
 HTML_START  : '<html>'  -> pushMode(HTML_MODE);
 
+TRIPLE_STRING
+    : '"""' .*? '"""'
+    ;
+
 // ------------------- Literals -------------------
 NUMBER
     : ('+'|'-')? [0-9]+ ('.' [0-9]+)?
@@ -124,15 +128,11 @@ STRING
     | '\'' (~['\\] | '\\' .)* '\''
     ;
 
-TRIPLE_STRING
-    : '"""' .*? '"""'
-    ;
 // ------------------- Identifiers -------------------
 
 IDENTIFIER
     : [a-zA-Z_][a-zA-Z_0-9]*
     ;
-
 // ------------------- Skip Spaces -------------------
 COMMENT
     : '#' ~[\r\n]* -> skip
@@ -214,6 +214,7 @@ mode JINJA_MODE;
 
 mode CSS_MODE;
     CSS_WS : [ \t\r\n]+ -> skip;
+    CSS_EXPR_START  : '{{' -> type(EXPR_START), pushMode(JINJA_MODE);
     CSS_PROPERTY_START : '{' ;
     CSS_PROPERTY_END : '}' ;
     CSS_COLON : ':' ;
@@ -243,14 +244,13 @@ mode HTML_MODE;
     TAG_SLASH        : '/';
     HTML_ASSIGN      : '=';
 
-    HTML_QUOTED_STRING : '"' (~["\\] | '\\' .)* '"'
-                       | '\'' (~['\\] | '\\' .)* '\''
-                       ;
+    HTML_STRING      : ('"' (~["\\] | '\\' .)* '"' | '\'' (~['\\] | '\\' .)* '\'') -> type(STRING);
 
-    HTML_CLASS       : 'class' -> type(CLASS);
+    HTML_NUMBER      : ('+'|'-')? [0-9]+ ('.' [0-9]+)? -> type(NUMBER);
+    HTML_CLASS       : 'class'                         -> type(CLASS);
     HTML_TAG_NAME    : [a-zA-Z][a-zA-Z0-9]*;
     HTML_ATTR_NAME   : [a-zA-Z_][a-zA-Z0-9_-]*;
 
-    HTML_TEXT : ~[<>{}/ \t\r\n]+ ;
+    HTML_TEXT        : ~[<>{}/ \t\r\n='"]+ ;
 
-    HTML_WS          : [ \t\r\n]+ -> skip;
+    HTML_WS : [ \t\r\n]+ -> skip;

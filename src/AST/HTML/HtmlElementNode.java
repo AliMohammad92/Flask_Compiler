@@ -14,7 +14,7 @@ import java.util.Map;
 public class HtmlElementNode extends ASTNode {
     private IdentifierNode tagName;
     private List<ASTNode> children = new ArrayList<>();
-    private Map<String, String> attributes = new HashMap<>();
+    private List<HtmlAttributeNode> attributes = new ArrayList<>();
     private static final Map<String, TagBehavior> behaviorTable = new HashMap<>();
 
     public HtmlElementNode(IdentifierNode tagName) {
@@ -41,11 +41,11 @@ public class HtmlElementNode extends ASTNode {
         this.children = children;
     }
 
-    public Map<String, String> getAttributes() {
+    public List<HtmlAttributeNode> getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(Map<String, String> attributes) {
+    public void setAttributes(List<HtmlAttributeNode> attributes) {
         this.attributes = attributes;
     }
 
@@ -56,26 +56,23 @@ public class HtmlElementNode extends ASTNode {
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
-        sb.append(prefix)
-                .append(isTail ? "└── " : "├── ")
-                .append("HtmlElementNode(").append(tagName).append(")\n");
+
+        sb.append(formatLine(prefix, isTail, "HtmlElementNode <" + tagName.getName() + ">"));
+
+        String newPrefix = nextPrefix(prefix, isTail);
 
         if (!attributes.isEmpty()) {
-            int i = 0;
-            for (var entry : attributes.entrySet()) {
-                boolean lastAttr = i == attributes.size() - 1 && children.isEmpty();
-                sb.append(prefix)
-                        .append(isTail ? "    " : "│   ")
-                        .append(lastAttr ? "└── " : "├── ")
-                        .append("Attribute(").append(entry.getKey()).append(")=").append(entry.getValue()).append("\n");
-                i++;
+            for (int i = 0; i < attributes.size(); i++) {
+                boolean lastAttr = (i == attributes.size() - 1) && children.isEmpty();
+                sb.append(attributes.get(i).toTreeString(newPrefix, lastAttr));
             }
         }
 
-        for (int i = 0; i < children.size(); i++) {
-            boolean lastChild = i == children.size() - 1;
-            sb.append(children.get(i)
-                    .toTreeString(prefix + (isTail ? "    " : "│   "), lastChild));
+        if (!children.isEmpty()) {
+            for (int i = 0; i < children.size(); i++) {
+                boolean lastChild = (i == children.size() - 1);
+                sb.append(children.get(i).toTreeString(newPrefix, lastChild));
+            }
         }
 
         return sb.toString();

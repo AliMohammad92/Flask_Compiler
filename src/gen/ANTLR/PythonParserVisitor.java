@@ -310,19 +310,11 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPythonImport(PythonParser.PythonImportContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code idImport}
-	 * labeled alternative in {@link PythonParser#importSyntax}.
+	 * Visit a parse tree produced by {@link PythonParser#importSyntax}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitIdImport(PythonParser.IdImportContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code strImport}
-	 * labeled alternative in {@link PythonParser#importSyntax}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitStrImport(PythonParser.StrImportContext ctx);
+	T visitImportSyntax(PythonParser.ImportSyntaxContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PythonParser#fromImport}.
 	 * @param ctx the parse tree
@@ -330,25 +322,37 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFromImport(PythonParser.FromImportContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code idFromImport}
+	 * Visit a parse tree produced by the {@code importID}
 	 * labeled alternative in {@link PythonParser#importSource}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitIdFromImport(PythonParser.IdFromImportContext ctx);
+	T visitImportID(PythonParser.ImportIDContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code strFromImport}
+	 * Visit a parse tree produced by the {@code importSTR}
 	 * labeled alternative in {@link PythonParser#importSource}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitStrFromImport(PythonParser.StrFromImportContext ctx);
+	T visitImportSTR(PythonParser.ImportSTRContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PythonParser#importList}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitImportList(PythonParser.ImportListContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PythonParser#importName}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitImportName(PythonParser.ImportNameContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PythonParser#aliasName}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAliasName(PythonParser.AliasNameContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PythonParser#printStatement}.
 	 * @param ctx the parse tree
@@ -421,13 +425,6 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitParameter(PythonParser.ParameterContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code returnTripleString}
-	 * labeled alternative in {@link PythonParser#returnStatement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitReturnTripleString(PythonParser.ReturnTripleStringContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code returnValue}
 	 * labeled alternative in {@link PythonParser#returnStatement}.
@@ -617,56 +614,91 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitHtmlAttributes(PythonParser.HtmlAttributesContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link PythonParser#attributeValue}.
+	 * Visit a parse tree produced by the {@code strAttrValue}
+	 * labeled alternative in {@link PythonParser#attributeValue}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitAttributeValue(PythonParser.AttributeValueContext ctx);
+	T visitStrAttrValue(PythonParser.StrAttrValueContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code numAttrValue}
+	 * labeled alternative in {@link PythonParser#attributeValue}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNumAttrValue(PythonParser.NumAttrValueContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code idAttrValue}
+	 * labeled alternative in {@link PythonParser#attributeValue}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIdAttrValue(PythonParser.IdAttrValueContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code jnjiaAttrValue}
+	 * labeled alternative in {@link PythonParser#attributeValue}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitJnjiaAttrValue(PythonParser.JnjiaAttrValueContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PythonParser#htmlText}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitHtmlText(PythonParser.HtmlTextContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code normalText}
-	 * labeled alternative in {@link PythonParser#htmlText}.
+	 * labeled alternative in {@link PythonParser#htmlTextPart}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitNormalText(PythonParser.NormalTextContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code quotedText}
-	 * labeled alternative in {@link PythonParser#htmlText}.
+	 * labeled alternative in {@link PythonParser#htmlTextPart}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitQuotedText(PythonParser.QuotedTextContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code tagAsText}
-	 * labeled alternative in {@link PythonParser#htmlText}.
+	 * labeled alternative in {@link PythonParser#htmlTextPart}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitTagAsText(PythonParser.TagAsTextContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code attrAsText}
-	 * labeled alternative in {@link PythonParser#htmlText}.
+	 * labeled alternative in {@link PythonParser#htmlTextPart}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitAttrAsText(PythonParser.AttrAsTextContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code idAsText}
-	 * labeled alternative in {@link PythonParser#htmlText}.
+	 * labeled alternative in {@link PythonParser#htmlTextPart}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitIdAsText(PythonParser.IdAsTextContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code classAsText}
-	 * labeled alternative in {@link PythonParser#htmlText}.
+	 * labeled alternative in {@link PythonParser#htmlTextPart}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitClassAsText(PythonParser.ClassAsTextContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code numberAsText}
+	 * labeled alternative in {@link PythonParser#htmlTextPart}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNumberAsText(PythonParser.NumberAsTextContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code jinjaAsText}
-	 * labeled alternative in {@link PythonParser#htmlText}.
+	 * labeled alternative in {@link PythonParser#htmlTextPart}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */

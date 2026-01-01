@@ -2,9 +2,9 @@ package AST;
 
 public class FromImportNode extends ASTNode {
     private ASTNode name;
-    private ASTNode importedList; // key = original name, value = alias (nullable)
+    private ImportedListNode importedList;
 
-    public FromImportNode(ASTNode name, ASTNode importedList) {
+    public FromImportNode(ASTNode name, ImportedListNode importedList) {
         this.name = name;
         this.importedList = importedList;
     }

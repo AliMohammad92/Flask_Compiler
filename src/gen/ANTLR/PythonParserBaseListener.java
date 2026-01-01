@@ -557,25 +557,13 @@ public class PythonParserBaseListener implements PythonParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterIdImport(PythonParser.IdImportContext ctx) { }
+	@Override public void enterImportSyntax(PythonParser.ImportSyntaxContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitIdImport(PythonParser.IdImportContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterStrImport(PythonParser.StrImportContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitStrImport(PythonParser.StrImportContext ctx) { }
+	@Override public void exitImportSyntax(PythonParser.ImportSyntaxContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -593,25 +581,25 @@ public class PythonParserBaseListener implements PythonParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterIdFromImport(PythonParser.IdFromImportContext ctx) { }
+	@Override public void enterImportID(PythonParser.ImportIDContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitIdFromImport(PythonParser.IdFromImportContext ctx) { }
+	@Override public void exitImportID(PythonParser.ImportIDContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterStrFromImport(PythonParser.StrFromImportContext ctx) { }
+	@Override public void enterImportSTR(PythonParser.ImportSTRContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitStrFromImport(PythonParser.StrFromImportContext ctx) { }
+	@Override public void exitImportSTR(PythonParser.ImportSTRContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -624,6 +612,30 @@ public class PythonParserBaseListener implements PythonParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitImportList(PythonParser.ImportListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterImportName(PythonParser.ImportNameContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitImportName(PythonParser.ImportNameContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAliasName(PythonParser.AliasNameContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAliasName(PythonParser.AliasNameContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -768,18 +780,6 @@ public class PythonParserBaseListener implements PythonParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitParameter(PythonParser.ParameterContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterReturnTripleString(PythonParser.ReturnTripleStringContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitReturnTripleString(PythonParser.ReturnTripleStringContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1157,13 +1157,61 @@ public class PythonParserBaseListener implements PythonParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterAttributeValue(PythonParser.AttributeValueContext ctx) { }
+	@Override public void enterStrAttrValue(PythonParser.StrAttrValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitAttributeValue(PythonParser.AttributeValueContext ctx) { }
+	@Override public void exitStrAttrValue(PythonParser.StrAttrValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterNumAttrValue(PythonParser.NumAttrValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNumAttrValue(PythonParser.NumAttrValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIdAttrValue(PythonParser.IdAttrValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIdAttrValue(PythonParser.IdAttrValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterJnjiaAttrValue(PythonParser.JnjiaAttrValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitJnjiaAttrValue(PythonParser.JnjiaAttrValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterHtmlText(PythonParser.HtmlTextContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitHtmlText(PythonParser.HtmlTextContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1236,6 +1284,18 @@ public class PythonParserBaseListener implements PythonParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitClassAsText(PythonParser.ClassAsTextContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterNumberAsText(PythonParser.NumberAsTextContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNumberAsText(PythonParser.NumberAsTextContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

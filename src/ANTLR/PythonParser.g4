@@ -39,7 +39,8 @@ assignment
     ;
 
 value
-    : atom
+    : tripleString
+    | atom
     | expressions
     | list
     | tuple
@@ -143,8 +144,7 @@ pythonImport
     ;
 
 importSyntax
-    : IMPORT IDENTIFIER (AS IDENTIFIER)? #idImport
-    | IMPORT STRING (AS IDENTIFIER)?     #strImport
+    : IMPORT importSource importName
     ;
 
 fromImport
@@ -152,16 +152,21 @@ fromImport
     ;
 
 importSource
-    : IDENTIFIER #idFromImport
-    | STRING     #strFromImport
+    : IDENTIFIER #importID
+    | STRING     #importSTR
     ;
 
 importList
-    : IDENTIFIER (AS IDENTIFIER)?
+    : importName (COMMA importName)
     ;
 
+importName
+    : IDENTIFIER aliasName?
+    ;
 
-
+aliasName
+    : AS IDENTIFIER
+    ;
 // ------------------- Print Statement -------------------
 printStatement
     : PRINT LPAREN printArgs? RPAREN
@@ -212,8 +217,7 @@ parameter
     : IDENTIFIER (ASSIGN value)?;
 
 returnStatement
-    : RETURN tripleString                     #returnTripleString
-    | RETURN value (COMMA value)              #returnValue
+    : RETURN value (COMMA value)*          #returnValue
     ;
 
 tripleString
@@ -326,7 +330,6 @@ templateBody
 //flask
 //    : pythonImport
 //    ;
-
 // ------------------- HTML -------------------
 html
     : HTML_START htmlElement* HTML_END
@@ -350,12 +353,12 @@ styleTag
 
 genericHtml
     : TAG_OPEN name=HTML_TAG_NAME htmlAttributes* TAG_CLOSE
-      (htmlElement | HTML_TEXT)*
+      htmlElement*
       TAG_OPEN TAG_SLASH HTML_TAG_NAME TAG_CLOSE
     ;
 
 selfClosingTag
-    : TAG_OPEN HTML_TAG_NAME htmlAttributes* TAG_SLASH TAG_CLOSE
+    : TAG_OPEN name=HTML_TAG_NAME htmlAttributes* TAG_SLASH TAG_CLOSE
     ;
 
 htmlAttributes
@@ -363,26 +366,27 @@ htmlAttributes
     ;
 
 attributeValue
-    : HTML_QUOTED_STRING | STRING | NUMBER
+    : STRING                #strAttrValue
+    | NUMBER                #numAttrValue
+    | IDENTIFIER            #idAttrValue
+    | jinjaExpression       #jnjiaAttrValue
     ;
 
 htmlText
+    : (parts+=htmlTextPart)+
+    ;
+
+htmlTextPart
     : HTML_TEXT          #normalText
-    | HTML_QUOTED_STRING #quotedText
+    | STRING             #quotedText
     | HTML_TAG_NAME      #tagAsText
     | HTML_ATTR_NAME     #attrAsText
     | IDENTIFIER         #idAsText
     | CLASS              #classAsText
+    | NUMBER             #numberAsText
     | jinjaExpression    #jinjaAsText
     ;
-//htmlText
-//    : ( parts+=HTML_TEXT
-//      | parts+=HTML_QUOTED_STRING
-//      | parts+=HTML_TAG_NAME
-//      | parts+=IDENTIFIER
-//      | jinjaExpression
-//      )+
-//    ;
+
 // ------------------- CSS -------------------
 css
     : cssSelector CSS_PROPERTY_START cssKeyValue* CSS_PROPERTY_END
