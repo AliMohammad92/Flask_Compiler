@@ -14,18 +14,10 @@ public class IndexAccessNode extends ASTNode {
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
-        sb.append(formatLine(prefix, isTail, "IndexAccessNode"));
+        sb.append(formatLine(prefix, isTail, "IndexAccessNode" + getLineInfo()));
         sb.append(object.toTreeString(nextPrefix(prefix, false), false));
         sb.append(index.toTreeString(nextPrefix(prefix, true), true));
         return sb.toString();
     }
 
-
-    @Override
-    public String toString() {
-        return "IndexAccessNode{" +
-                "object=" + object +
-                ", index=" + index +
-                '}';
-    }
 }

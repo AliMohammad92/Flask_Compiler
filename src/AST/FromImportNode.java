@@ -13,7 +13,7 @@ public class FromImportNode extends ASTNode {
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append(formatLine(prefix, isTail, "FromImportNode"));
+        sb.append(formatLine(prefix, isTail, "FromImportNode" + getLineInfo()));
 
         boolean hasImports = importedList != null;
 

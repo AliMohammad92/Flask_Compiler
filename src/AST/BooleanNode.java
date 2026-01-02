@@ -15,14 +15,11 @@ public class BooleanNode extends ASTNode {
 
     @Override
     public String toTreeString(String prefix, boolean isTail) {
-        return formatLine(prefix, isTail, "BooleanNode(" + value + ")");
+        return formatLine(prefix, isTail, "BooleanNode(" + value + ")" + getLineInfo());
     }
-
 
     @Override
     public String toString() {
-        return "BooleanNode{" +
-                "value=" + value +
-                '}';
+        return  "" + value;
     }
 }

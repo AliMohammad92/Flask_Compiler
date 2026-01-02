@@ -26,7 +26,7 @@ public class Symbol {
 
     @Override
     public String toString() {
-        return String.format("%-10s | %-8s | %-19s | %-10s | line %d",
+        return String.format("%-15s | %-15s | %-19s | %-10s | line %d",
                 name,
                 type,
                 value,

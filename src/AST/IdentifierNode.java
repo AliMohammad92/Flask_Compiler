@@ -19,7 +19,7 @@ public class IdentifierNode extends ASTNode {
 
     @Override
     public String toTreeString(String prefix, boolean isTail) {
-        return formatLine(prefix, isTail, "IdentifierNode(" + name + ")");
+        return formatLine(prefix, isTail, "IdentifierNode(" + name + ")" + getLineInfo());
     }
 
     @Override

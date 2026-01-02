@@ -18,15 +18,20 @@ public class DecoratorNode extends ASTNode {
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
-        sb.append(formatLine(prefix, isTail, "DecoratorNode"));
+        sb.append(formatLine(prefix, isTail, "DecoratorNode" + getLineInfo()));
 
         if (name != null) {
             sb.append(name.toTreeString(nextPrefix(prefix, true), false));
         }
         if (target != null) {
-            sb.append(formatLine(nextPrefix(prefix, true), true, "Target: " + target.toString()));
+            sb.append(formatLine(nextPrefix(prefix, true), true, "Target: " + target.toString() + getLineInfo()));
         }
 
         return sb.toString();
+    }
+
+    @Override
+    public String toString() {
+        return name.toString();
     }
 }

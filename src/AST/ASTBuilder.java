@@ -1,5 +1,6 @@
 package AST;
 
+import AST.CSS.CssBlockNode;
 import AST.CSS.CssNode;
 import AST.CSS.CssPropertyNode;
 import AST.HTML.HtmlAttributeNode;
@@ -9,8 +10,13 @@ import AST.HTML.TextNode;
 import AST.JINJA2.*;
 import SymbolTable.SymbolTable;
 import SymbolTable.Symbol;
+import gen.ANTLR.PythonLexer;
 import gen.ANTLR.PythonParser;
 import gen.ANTLR.PythonParserBaseVisitor;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.*;
@@ -18,6 +24,13 @@ import java.util.*;
 public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
 
     public SymbolTable table = new SymbolTable();
+
+    private <T extends ASTNode> T setLine(T node, ParserRuleContext ctx) {
+        if (node != null && ctx != null) {
+            node.setLineNumber(ctx.start.getLine());
+        }
+        return node;
+    }
 
     // =========================
     // Program & Statement Nodes
@@ -42,63 +55,82 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
     public ASTNode visitAssignment(PythonParser.AssignmentContext ctx) {
         String varName = ctx.IDENTIFIER().getText();
         ASTNode value = visit(ctx.value());
-        Object actualValue = getActualValue(value);
+        if (value != null)
+            table.define(new Symbol(varName, Symbol.SymbolType.VARIABLE, value, value.getClass().getSimpleName(), ctx.start.getLine()));
 
-        if (actualValue != null) {
-            String type = actualValue.getClass().getSimpleName();
-            table.define(new Symbol(varName, Symbol.SymbolType.VARIABLE, actualValue, type, ctx.start.getLine()));
-        } else {
-            String type = value != null ? value.getClass().getSimpleName() : null;
-            table.define(new Symbol(varName, Symbol.SymbolType.VARIABLE, type, null, ctx.start.getLine()));
-        }
-
-        return new AssignmentNode(varName, value);
+        return setLine(new AssignmentNode(varName, value), ctx);
     }
 
-    @Override
-    public ASTNode visitValue(PythonParser.ValueContext ctx) {
-        if (ctx.atom() != null) {
-            return visit(ctx.atom());
-        } else if (ctx.expressions() != null) {
-            return visit(ctx.expressions());
-        } else if (ctx.list() != null) {
-            return visit(ctx.list());
-        } else if (ctx.functionCall() != null) {
-            return visit(ctx.functionCall());
-        } else if (ctx.json() != null){
-            return visit(ctx.json());
-        } else if (ctx.tripleString() != null)
-            return visit(ctx.tripleString());
-        return null;
-    }
+//    @Override
+//    public ASTNode visitValue(PythonParser.ValueContext ctx) {
+//        if (ctx.json() != null) {
+//            return visit(ctx.json());
+//        } else if (ctx.list() != null) {
+//            return visit(ctx.list());
+//        } else if (ctx.functionCall() != null) {
+//            return visit(ctx.functionCall());
+//        } else if (ctx.expressions() != null) {
+//            return visit(ctx.expressions());
+//        } else if (ctx.atom() != null) {
+//            return visit(ctx.atom());
+//        }
+//        return null;
+//    }
 
     // =========================
     // Literal Nodes
     // =========================
     @Override
     public ASTNode visitNumber(PythonParser.NumberContext ctx) {
-        System.out.println(ctx.NUMBER().getText());
-        return new NumberNode(ctx.NUMBER().getText());
+        String content = ctx.NUMBER().getText();
+
+        return setLine(new NumberNode(content), ctx);
+    }
+
+    private ASTNode handleHTMLInTripleString(String content) {
+        content = content.substring(3, content.length() - 3);
+        CharStream input = CharStreams.fromString(content);
+        PythonLexer lexer = new PythonLexer(input);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        PythonParser parser = new PythonParser(tokens);
+        ParseTree tree = parser.html();
+        HtmlElementNode htmlRoot = (HtmlElementNode) visit(tree);
+
+        return new HtmlInTripleString(List.of(htmlRoot));
     }
 
     @Override
     public ASTNode visitId(PythonParser.IdContext ctx) {
-        return new IdentifierNode(ctx.IDENTIFIER().getText());
+        return setLine(new IdentifierNode(ctx.IDENTIFIER().getText()), ctx);
     }
 
     @Override
     public ASTNode visitTrue(PythonParser.TrueContext ctx) {
-        return new BooleanNode(true);
+        return setLine(new BooleanNode(true), ctx);
     }
 
     @Override
     public ASTNode visitFalse(PythonParser.FalseContext ctx) {
-        return new BooleanNode(false);
+        return setLine(new BooleanNode(false), ctx);
+    }
+
+    @Override
+    public ASTNode visitNone(PythonParser.NoneContext ctx) {
+        return setLine(new NoneNode(), ctx);
     }
 
     @Override
     public ASTNode visitString(PythonParser.StringContext ctx) {
-        return new StringNode(ctx.STRING().getText());
+        String clean = cleanString(ctx.STRING().getText());
+        return setLine(new StringNode(clean), ctx);
+    }
+
+    @Override
+    public ASTNode visitTriple_String(PythonParser.Triple_StringContext ctx) {
+        String content = ctx.TRIPLE_STRING().getText();
+        if (content.contains("<html>") || content.contains("</html>"))
+            return setLine(handleHTMLInTripleString(content), ctx);
+        return setLine(new StringNode(content), ctx);
     }
 
     @Override
@@ -122,7 +154,7 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
             }
         }
 
-        return node;
+        return setLine(node, ctx);
     }
 
     @Override
@@ -131,7 +163,7 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         for (var id : ctx.IDENTIFIER()) {
             vars.add(new IdentifierNode(id.getText()));
         }
-        return new GlobalNode(vars);
+        return setLine(new GlobalNode(vars), ctx);
     }
 
     // =========================
@@ -141,8 +173,8 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         return new BinaryOpNode(operator, left, right);
     }
 
-    private ASTNode buildUnary(ASTNode expression, String operator) {
-        return new UnaryNode(operator, expression);
+    private ASTNode buildUnary(ASTNode expression) {
+        return new UnaryNode("not", expression);
     }
 
     public static Object getActualValue(ASTNode node) {
@@ -172,7 +204,7 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
     }
 
     private Map.Entry<String, ASTNode> getJsonData(PythonParser.JsonDataContext ctx) {
-        String key = ctx.STRING().getText().replace("\"", "");
+        String key = cleanString(ctx.STRING().getText());
         ASTNode value = visit(ctx.value());
         return new AbstractMap.SimpleEntry<>(key, value);
     }
@@ -195,17 +227,17 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
     public ASTNode visitImportSyntax(PythonParser.ImportSyntaxContext ctx) {
         ASTNode source = visit(ctx.importSource());
         ImportedNameNode imported = (ImportedNameNode) visit(ctx.importName());
-        return new ImportNode(source, imported);
+        return setLine(new ImportNode(source, imported), ctx);
     }
 
     @Override
     public ASTNode visitImportID(PythonParser.ImportIDContext ctx) {
-        return new IdentifierNode(ctx.IDENTIFIER().toString());
+        return setLine(new IdentifierNode(ctx.IDENTIFIER().toString()), ctx);
     }
 
     @Override
     public ASTNode visitImportSTR(PythonParser.ImportSTRContext ctx) {
-        return new StringNode(ctx.STRING().getText());
+        return setLine(new StringNode(ctx.STRING().getText()), ctx);
     }
 
     @Override
@@ -214,19 +246,19 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         IdentifierNode alias = null;
         if (ctx.aliasName() != null)
             alias = (IdentifierNode) visit(ctx.aliasName());
-        return new ImportedNameNode(name, alias);
+        return setLine(new ImportedNameNode(name, alias), ctx);
     }
 
     @Override
     public ASTNode visitAliasName(PythonParser.AliasNameContext ctx) {
-        return new IdentifierNode(ctx.IDENTIFIER().toString());
+        return setLine(new IdentifierNode(ctx.IDENTIFIER().toString()), ctx);
     }
 
     @Override
     public ASTNode visitFromImport(PythonParser.FromImportContext ctx) {
         ASTNode sourceNode = visit(ctx.importSource());
         ImportedListNode importedListNode = (ImportedListNode) visit(ctx.importList());
-        return new FromImportNode(sourceNode, importedListNode);
+        return setLine(new FromImportNode(sourceNode, importedListNode), ctx);
     }
 
     @Override
@@ -246,7 +278,7 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
 
             imports.add(node);
         }
-        return new ImportedListNode(imports);
+        return setLine(new ImportedListNode(imports), ctx);
     }
 
     // =========================
@@ -254,27 +286,27 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
     // =========================
     @Override
     public ASTNode visitAddExp(PythonParser.AddExpContext ctx) {
-        return buildBinary(visit(ctx.left), visit(ctx.right), "+");
+        return setLine(buildBinary(visit(ctx.left), visit(ctx.right), "+"), ctx);
     }
 
     @Override
     public ASTNode visitSubExp(PythonParser.SubExpContext ctx) {
-        return buildBinary(visit(ctx.left), visit(ctx.right), "-");
+        return setLine(buildBinary(visit(ctx.left), visit(ctx.right), "-"), ctx);
     }
 
     @Override
     public ASTNode visitMulExp(PythonParser.MulExpContext ctx) {
-        return buildBinary(visit(ctx.left), visit(ctx.right), "*");
+        return setLine(buildBinary(visit(ctx.left), visit(ctx.right), "*"), ctx);
     }
 
     @Override
     public ASTNode visitDivExp(PythonParser.DivExpContext ctx) {
-        return buildBinary(visit(ctx.left), visit(ctx.right), "/");
+        return setLine(buildBinary(visit(ctx.left), visit(ctx.right), "/"), ctx);
     }
 
     @Override
     public ASTNode visitModExp(PythonParser.ModExpContext ctx) {
-        return buildBinary(visit(ctx.left), visit(ctx.right), "%");
+        return setLine(buildBinary(visit(ctx.left), visit(ctx.right), "%"), ctx);
     }
 
     // =========================
@@ -282,53 +314,53 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
     // =========================
     @Override
     public ASTNode visitLtExp(PythonParser.LtExpContext ctx) {
-        return buildBinary(visit(ctx.left), visit(ctx.right), "<");
+        return setLine(buildBinary(visit(ctx.left), visit(ctx.right), "<"), ctx);
     }
 
     @Override
     public ASTNode visitGtExp(PythonParser.GtExpContext ctx) {
-        return buildBinary(visit(ctx.left), visit(ctx.right), ">");
+        return setLine(buildBinary(visit(ctx.left), visit(ctx.right), ">"), ctx);
     }
 
     @Override
     public ASTNode visitLteExp(PythonParser.LteExpContext ctx) {
-        return buildBinary(visit(ctx.left), visit(ctx.right), "<=");
+        return setLine(buildBinary(visit(ctx.left), visit(ctx.right), "<="), ctx);
     }
 
     @Override
     public ASTNode visitGteExp(PythonParser.GteExpContext ctx) {
-        return buildBinary(visit(ctx.left), visit(ctx.right), ">=");
+        return setLine(buildBinary(visit(ctx.left), visit(ctx.right), ">="), ctx);
     }
 
     @Override
     public ASTNode visitEqExp(PythonParser.EqExpContext ctx) {
-        return buildBinary(visit(ctx.left), visit(ctx.right), "==");
+        return setLine(buildBinary(visit(ctx.left), visit(ctx.right), "=="), ctx);
     }
 
     @Override
     public ASTNode visitNeExp(PythonParser.NeExpContext ctx) {
-        return buildBinary(visit(ctx.left), visit(ctx.right), "!=");
+        return setLine(buildBinary(visit(ctx.left), visit(ctx.right), "!="), ctx);
     }
 
     @Override
     public ASTNode visitStrictEqExp(PythonParser.StrictEqExpContext ctx) {
-        return buildBinary(visit(ctx.left), visit(ctx.right), "===");
+        return setLine(buildBinary(visit(ctx.left), visit(ctx.right), "==="), ctx);
     }
 
     @Override
     public ASTNode visitStrictNeqExp(PythonParser.StrictNeqExpContext ctx) {
-        return buildBinary(visit(ctx.left), visit(ctx.right), "!==");
+        return setLine(buildBinary(visit(ctx.left), visit(ctx.right), "!=="), ctx);
     }
 
     @Override
     public ASTNode visitIdComparison(PythonParser.IdComparisonContext ctx) {
         String operator = ctx.NOT() != null ? "is" : "is not";
-        return buildBinary(visit(ctx.left), visit(ctx.right), operator);
+        return setLine(buildBinary(visit(ctx.left), visit(ctx.right), operator), ctx);
     }
 
     @Override
     public ASTNode visitMembershipTest(PythonParser.MembershipTestContext ctx) {
-        return buildBinary(visit(ctx.left), visit(ctx.right), "in");
+        return setLine(buildBinary(visit(ctx.left), visit(ctx.right), "in"), ctx);
     }
 
     // =========================
@@ -336,17 +368,17 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
     // =========================
     @Override
     public ASTNode visitAndExp(PythonParser.AndExpContext ctx) {
-        return buildBinary(visit(ctx.left), visit(ctx.right), "and");
+        return setLine(buildBinary(visit(ctx.left), visit(ctx.right), "and"), ctx);
     }
 
     @Override
     public ASTNode visitOrExp(PythonParser.OrExpContext ctx) {
-        return buildBinary(visit(ctx.left), visit(ctx.right), "or");
+        return setLine(buildBinary(visit(ctx.left), visit(ctx.right), "or"), ctx);
     }
 
     @Override
     public ASTNode visitNotExp(PythonParser.NotExpContext ctx) {
-        return buildUnary(visit(ctx.item), "not");
+        return setLine(buildUnary(visit(ctx.item)), ctx);
     }
 
     // =========================
@@ -358,19 +390,21 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         for (PythonParser.ValueContext valCtx : ctx.value()) {
             list.addElement(visit(valCtx));
         }
-        return list;
+        return setLine(list, ctx);
     }
 
     @Override
     public ASTNode visitList(PythonParser.ListContext ctx) {
         ListNode list = new ListNode();
         if (ctx.elements() != null) {
-            ListNode elementsList = (ListNode) visit(ctx.elements());
-            for (ASTNode elem : elementsList.getElements()) {
-                list.addElement(elem);
+            ASTNode visitedElements = visit(ctx.elements());
+            if (visitedElements instanceof ListNode elementsList) {
+                for (ASTNode elem : elementsList.getElements()) {
+                    list.addElement(elem);
+                }
             }
         }
-        return list;
+        return setLine(list, ctx);
     }
 
     @Override
@@ -382,31 +416,22 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         if (ctx.expressions() != null) {
             condition = visit(ctx.expressions());
         }
-        return new ListComprehensionNode(elementExpression, variable, iterable, condition);
+        return setLine(new ListComprehensionNode(elementExpression, variable, iterable, condition), ctx);
     }
 
     @Override
     public ASTNode visitTuple(PythonParser.TupleContext ctx) {
         TupleNode tuple = new TupleNode();
         if (ctx.elements() != null) {
-            TupleNode elementsTuple = (TupleNode) visit(ctx.elements());
-            for (ASTNode elem : elementsTuple.getElements()) {
-                tuple.addElement(elem);
+            ASTNode visitedElements = visit(ctx.elements());
+            if (visitedElements instanceof ListNode elementsList) {
+                for (ASTNode elem : elementsList.getElements()) {
+                    tuple.addElement(elem);
+                }
             }
         }
-        return tuple;
+        return setLine(tuple, ctx);
     }
-
-    @Override
-    public ASTNode visitJson(PythonParser.JsonContext ctx) {
-        Map<String, ASTNode> data = new LinkedHashMap<>();
-        for (PythonParser.JsonDataContext jData : ctx.jsonData()) {
-            Map.Entry<String, ASTNode> entry = getJsonData(jData);
-            data.put(entry.getKey(), entry.getValue());
-        }
-        return new JSONNode(data);
-    }
-
 
     // =========================
     // Condition Nodes (if/elif/else)
@@ -420,7 +445,7 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
                 block.addStatement(stmtNode);
             }
         }
-        return block;
+        return setLine(block, ctx);
     }
 
     @Override
@@ -439,7 +464,7 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
             ifNode.setElse(elseNode);
         }
 
-        return ifNode;
+        return setLine(ifNode, ctx);
     }
 
     @Override
@@ -453,7 +478,7 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         ifNode.setBody(body);
         table.exitScope();
 
-        return ifNode;
+        return setLine(ifNode, ctx);
     }
 
     @Override
@@ -463,7 +488,7 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         List<ASTNode> body = ((ProgramNode) visit(ctx.block())).getStatements();
         table.exitScope();
 
-        return new ElifNode(condition, body);
+        return setLine(new ElifNode(condition, body), ctx);
     }
 
     @Override
@@ -472,7 +497,7 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         List<ASTNode> elseBody = ((ProgramNode) visit(ctx.block())).getStatements();
         table.exitScope();
 
-        return new ElseNode(elseBody);
+        return setLine(new ElseNode(elseBody), ctx);
     }
 
     // =========================
@@ -483,14 +508,6 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         String name = ctx.IDENTIFIER().getText();
         List<ParameterNode> params = new ArrayList<>();
         List<DecoratorNode> decorators = new ArrayList<>();
-
-        if (ctx.decorator_rule() != null) {
-            for (PythonParser.Decorator_ruleContext dec : ctx.decorator_rule()) {
-                ASTNode decoName = visit(dec);
-                decorators.add(new DecoratorNode(decoName, null));
-                table.define(new Symbol(decoName.toString(), Symbol.SymbolType.DECORATOR, null, "Decorator", ctx.start.getLine()));
-            }
-        }
 
         if (ctx.parameters() != null) {
             for (PythonParser.ParameterContext paramCtx : ctx.parameters().parameter()) {
@@ -509,12 +526,18 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
 
         FunctionNode funcNode = new FunctionNode(name, params, body);
 
-        for (DecoratorNode deco : decorators) {
-            deco.setTarget(funcNode);
+        if (ctx.decorator_rule() != null) {
+            for (PythonParser.Decorator_ruleContext dec : ctx.decorator_rule()) {
+                DecoratorNode decoName = (DecoratorNode) visit(dec);
+                decoName.setTarget(funcNode);
+                decorators.add(decoName);
+                table.define(new Symbol(decoName.toString(), Symbol.SymbolType.DECORATOR, null, "Decorator", ctx.start.getLine()));
+            }
         }
+
         funcNode.setDecorators(decorators);
         table.define(new Symbol(name, Symbol.SymbolType.FUNCTION, null, "Function", ctx.start.getLine() + ctx.decorator_rule().size()));
-        return funcNode;
+        return setLine(funcNode, ctx);
     }
 
     @Override
@@ -524,31 +547,42 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
             for (PythonParser.ValueContext val : ctx.value())
             {
                 values.add(visit(val));
-                System.out.println(val.getClass().getSimpleName());
             }
         }
-        return new ReturnNode(values);
+        return setLine(new ReturnNode(values), ctx);
     }
 
-
+    @Override
+    public ASTNode visitReturnTripleString(PythonParser.ReturnTripleStringContext ctx) {
+        ASTNode returnValue = visit(ctx.tripleString());
+        return setLine(new ReturnNode(Collections.singletonList(returnValue)), ctx);
+    }
 
     @Override
     public ASTNode visitTripleString(PythonParser.TripleStringContext ctx) {
-        String htmlContent = ctx.TRIPLE_STRING().getText();
-        boolean isHtml = htmlContent.contains("<") && htmlContent.contains(">");
-        htmlContent = htmlContent.substring(3, htmlContent.length() - 3);
-        System.out.println(htmlContent);
+        String content = ctx.TRIPLE_STRING().getText();
+        boolean isHtml = content.contains("<") && content.contains(">");
         if (isHtml) {
-            System.out.println("HTML");
-//            CharStream input = CharStreams.fromString(htmlContent);
-//            PythonLexer lexer = new PythonLexer(input);
-//            CommonTokenStream tokens = new CommonTokenStream(lexer);
-//            PythonParser parser = new PythonParser(tokens);
-//            ParseTree tree = parser.htmlBody();
-//            ASTNode htmlAST = visit(tree);
-//            return new ReturnNode(Collections.singletonList(htmlAST));
+            return handleHTMLInTripleString(content);
         }
-            return new StringNode("\"\"\"" + htmlContent + "\"\"\"");
+        return new StringNode(content);
+    }
+
+
+    @Override
+    public ASTNode visitJsonRule(PythonParser.JsonRuleContext ctx) {
+        List<JSONData> data = new ArrayList<>();
+        for (PythonParser.JsonDataContext jsonData : ctx.jsonData()) {
+            data.add((JSONData) visit(jsonData));
+        }
+        return setLine(new JSONNode(data), ctx);
+    }
+
+    @Override
+    public ASTNode visitJsonData(PythonParser.JsonDataContext ctx) {
+        ASTNode key = new StringNode(cleanString(ctx.STRING().getText()));
+        ASTNode value = ctx.value() != null ? visit(ctx.value()) : new StringNode(ctx.getText());
+        return new JSONData(key, value);
     }
 
     @Override
@@ -558,7 +592,7 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         for (PythonParser.ArgumentContext arg : ctx.argument()) {
             arguments.add(visit(arg));
         }
-        return new FunctionCallNode(funName, arguments);
+        return setLine(new FunctionCallNode(funName, arguments), ctx);
     }
 
     @Override
@@ -569,7 +603,7 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         }
         ASTNode value = visit(ctx.value());
 
-        return new ArgumentNode(varName, value);
+        return setLine(new ArgumentNode(varName, value), ctx);
     }
 
     // =========================
@@ -583,7 +617,7 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         List<ASTNode> body = ((ProgramNode) visit(ctx.block())).getStatements();
         table.exitScope();
 
-        return new ForNode(variable, value, body);
+        return setLine(new ForNode(variable, value, body), ctx);
     }
 
     @Override
@@ -592,12 +626,13 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         table.enterScope("while_" + ctx.start.getLine());
         List<ASTNode> body = ((ProgramNode) visit(ctx.block())).getStatements();
         table.exitScope();
-        return new WhileNode(expression, body);
+        return setLine(new WhileNode(expression, body), ctx);
     }
 
     @Override
     public ASTNode visitDecorator(PythonParser.DecoratorContext ctx) {
-        return visit(ctx.atom());
+        ASTNode deco = visit(ctx.atom());
+        return setLine(new DecoratorNode(deco, null), ctx);
     }
 
     // =========================
@@ -613,16 +648,15 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         }
 
         List<DecoratorNode> decorators = new ArrayList<>();
-
+        ClassNode classNode = new ClassNode(name, baseClass);
         if (ctx.decorator_rule() != null) {
             for (PythonParser.Decorator_ruleContext dec : ctx.decorator_rule()) {
-                ASTNode decoName = visit(dec);
-                decorators.add(new DecoratorNode(decoName, null));
+                DecoratorNode decoName = (DecoratorNode) visit(dec);
+                decoName.setTarget(classNode);
+                decorators.add(decoName);
                 table.define(new Symbol(decoName.toString(), Symbol.SymbolType.DECORATOR, null, "Decorator", ctx.start.getLine()));
             }
         }
-
-        ClassNode classNode = new ClassNode(name, baseClass);
 
         for (DecoratorNode deco : decorators) {
             deco.setTarget(classNode);
@@ -644,7 +678,7 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         }
 
         table.exitScope();
-        return classNode;
+        return setLine(classNode, ctx);
     }
 
     // =========================
@@ -659,7 +693,7 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
                 nodes.add(visit(arg));
             }
         }
-        return new PrintNode(nodes);
+        return setLine(new PrintNode(nodes), ctx);
     }
 
     // =========================
@@ -676,7 +710,7 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
                 body.addStatement(node);
             }
         }
-        return body;
+        return setLine(body, ctx);
     }
 
     @Override
@@ -692,7 +726,7 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
             table.define(new Symbol(varName, Symbol.SymbolType.VARIABLE, value.getClass().getSimpleName(), null, ctx.start.getLine()));
         }
 
-        return new AssignmentNode(varName, value);
+        return setLine(new AssignmentNode(varName, value), ctx);
     }
 
     @Override
@@ -707,7 +741,7 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
             innerExpression = visit(ctx.value());
         }
 
-        return new JinjaExpressionNode(innerExpression);
+        return setLine(new JinjaExpressionNode(innerExpression), ctx);
     }
 
     @Override
@@ -726,7 +760,7 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
             ifNode.setElse(elseNode);
         }
 
-        return ifNode;
+        return setLine(ifNode, ctx);
     }
 
     @Override
@@ -739,7 +773,7 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         ifNode.setBody(body);
         table.exitScope();
 
-        return ifNode;
+        return setLine(ifNode, ctx);
     }
 
     @Override
@@ -749,7 +783,7 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         List<ASTNode> body = ((ProgramNode) visit(ctx.templateBody())).getStatements();
         table.exitScope();
 
-        return new ElifNode(condition, body);
+        return setLine(new ElifNode(condition, body), ctx);
     }
 
     @Override
@@ -758,7 +792,7 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         List<ASTNode> body = ((ProgramNode) visit(ctx.templateBody())).getStatements();
         table.exitScope();
 
-        return new ElseNode(body);
+        return setLine(new ElseNode(body), ctx);
     }
 
     @Override
@@ -769,13 +803,13 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         List<ASTNode> body = ((ProgramNode) visit(ctx.templateBody())).getStatements();
         table.exitScope();
 
-        return new ForNode(variable, iterable, body);
+        return setLine(new ForNode(variable, iterable, body), ctx);
     }
 
     @Override
     public ASTNode visitJiniaExtends(PythonParser.JiniaExtendsContext ctx) {
         ASTNode template = visit(ctx.atom());
-        return new ExtendNode(template);
+        return setLine(new ExtendNode(template), ctx);
     }
 
     @Override
@@ -783,14 +817,13 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         ASTNode template = visit(ctx.atom());
         boolean ignoreMissing = ctx.JINJA_IGNORE() != null;
         boolean withContext = ctx.JINJA_WITH() != null;
-        return new IncludeNode(template, ignoreMissing, withContext);
+        return setLine(new IncludeNode(template, ignoreMissing, withContext), ctx);
     }
 
 
     // =========================
     // HTML
     // =========================
-
 
     @Override
     public ASTNode visitHtml(PythonParser.HtmlContext ctx) {
@@ -803,17 +836,13 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
             }
         }
         element.setChildren(children);
-        return element;
-    }
-
-    @Override
-    public ASTNode visitHtmlElement(PythonParser.HtmlElementContext ctx) {
-        return super.visitHtmlElement(ctx);
+        return setLine(element, ctx);
     }
 
     @Override
     public ASTNode visitSelfClosingTag(PythonParser.SelfClosingTagContext ctx) {
-        HtmlElementNode element = new HtmlElementNode(new IdentifierNode(ctx.name.getText()));
+        String tagName = ctx.NESTED_TAG_OPEN().getText().substring(1);
+        HtmlElementNode element = new HtmlElementNode(new IdentifierNode(tagName));
         List<HtmlAttributeNode> attributes = new ArrayList<>();
         for (var attrCtx : ctx.htmlAttributes()) {
             HtmlAttributeNode attr = (HtmlAttributeNode) visit(attrCtx);
@@ -821,7 +850,7 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
                 attributes.add(attr);
         }
         element.setAttributes(attributes);
-        return element;
+        return setLine(element, ctx);
     }
 
     @Override
@@ -830,19 +859,17 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         List<ASTNode> cssBlocks = new ArrayList<>();
         for (var cssCtx : ctx.css()) {
             ASTNode css = visit(cssCtx);
-            System.out.println(css);
             if (css != null)
                 cssBlocks.add(css);
         }
         styleNode.setChildren(cssBlocks);
-        return styleNode;
+        return setLine(styleNode, ctx);
     }
 
     @Override
-    public ASTNode visitGenericHtml(PythonParser.GenericHtmlContext ctx) {
-        String tagName = ctx.name.getText();
+    public ASTNode visitNormalTag(PythonParser.NormalTagContext ctx) {
+        String tagName = ctx.TAG_OPEN().getText().substring(1);
         HtmlElementNode element = new HtmlElementNode(new IdentifierNode(tagName));
-
         List<HtmlAttributeNode> attributes = new ArrayList<>();
         for (var attrCtx : ctx.htmlAttributes()) {
             HtmlAttributeNode attr = (HtmlAttributeNode) visit(attrCtx);
@@ -859,7 +886,46 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
             }
         }
         element.setChildren(children);
-        return element;
+
+        return setLine(element, ctx);
+    }
+
+    @Override
+    public ASTNode visitSelfClosing(PythonParser.SelfClosingContext ctx) {
+        String tagName = ctx.TAG_OPEN().getText().substring(1);
+        HtmlElementNode element = new HtmlElementNode(new IdentifierNode(tagName));
+        List<HtmlAttributeNode> attributes = new ArrayList<>();
+        for (var attrCtx : ctx.htmlAttributes()) {
+            HtmlAttributeNode attr = (HtmlAttributeNode) visit(attrCtx);
+            if (attr != null)
+                attributes.add(attr);
+        }
+        element.setAttributes(attributes);
+        return setLine(element, ctx);
+    }
+
+    @Override
+    public ASTNode visitNestedTag(PythonParser.NestedTagContext ctx) {
+        String tagName = ctx.NESTED_TAG_OPEN().getText().substring(1);
+        HtmlElementNode element = new HtmlElementNode(new IdentifierNode(tagName));
+        List<HtmlAttributeNode> attributes = new ArrayList<>();
+        for (var attrCtx : ctx.htmlAttributes()) {
+            HtmlAttributeNode attr = (HtmlAttributeNode) visit(attrCtx);
+            if (attr != null)
+                attributes.add(attr);
+        }
+        element.setAttributes(attributes);
+
+        List<ASTNode> children = new ArrayList<>();
+        for (var childCtx : ctx.htmlElement()) {
+            ASTNode childNode = visit(childCtx);
+            if (childNode != null) {
+                children.add(childNode);
+            }
+        }
+        element.setChildren(children);
+
+        return setLine(element, ctx);
     }
 
     @Override
@@ -867,22 +933,22 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         ASTNode key = new StringNode(ctx.getChild(0).getText());
         ASTNode value = visit(ctx.attributeValue());
 
-        return new HtmlAttributeNode(key, value);
+        return setLine(new HtmlAttributeNode(key, value), ctx);
     }
 
     @Override
     public ASTNode visitStrAttrValue(PythonParser.StrAttrValueContext ctx) {
-        return new StringNode(ctx.STRING().getText());
+        return setLine(new StringNode(ctx.STRING().getText()), ctx);
     }
 
     @Override
     public ASTNode visitNumAttrValue(PythonParser.NumAttrValueContext ctx) {
-        return new NumberNode(ctx.NUMBER().getText());
+        return setLine(new NumberNode(ctx.NUMBER().getText()), ctx);
     }
 
     @Override
     public ASTNode visitIdAttrValue(PythonParser.IdAttrValueContext ctx) {
-        return new IdentifierNode(ctx.IDENTIFIER().getText());
+        return setLine(new IdentifierNode(ctx.IDENTIFIER().getText()), ctx);
     }
 
     @Override
@@ -906,42 +972,12 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
                 segments.add(current);
             }
         }
-        return new HtmlTextNode(segments);
+        return setLine(new HtmlTextNode(segments), ctx);
     }
 
     @Override
     public ASTNode visitNormalText(PythonParser.NormalTextContext ctx) {
-        return new TextNode(ctx.HTML_TEXT().getText());
-    }
-
-    @Override
-    public ASTNode visitQuotedText(PythonParser.QuotedTextContext ctx) {
-        return new TextNode(cleanString(ctx.STRING().getText()));
-    }
-
-    @Override
-    public ASTNode visitTagAsText(PythonParser.TagAsTextContext ctx) {
-        return new TextNode(ctx.HTML_TAG_NAME().getText());
-    }
-
-    @Override
-    public ASTNode visitAttrAsText(PythonParser.AttrAsTextContext ctx) {
-        return new TextNode(ctx.HTML_ATTR_NAME().getText());
-    }
-
-    @Override
-    public ASTNode visitIdAsText(PythonParser.IdAsTextContext ctx) {
-        return new TextNode(ctx.IDENTIFIER().getText());
-    }
-
-    @Override
-    public ASTNode visitClassAsText(PythonParser.ClassAsTextContext ctx) {
-        return new TextNode(ctx.CLASS().getText());
-    }
-
-    @Override
-    public ASTNode visitNumberAsText(PythonParser.NumberAsTextContext ctx) {
-        return new TextNode(ctx.NUMBER().getText());
+        return setLine(new TextNode(ctx.HTML_TEXT().getText()), ctx);
     }
 
     @Override
@@ -957,45 +993,64 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
     public ASTNode visitCss(PythonParser.CssContext ctx) {
         ASTNode selector = visit(ctx.cssSelector());
         List<CssPropertyNode> properties = new ArrayList<>();
-        CssNode css = new CssNode(null, selector);
         for (PythonParser.CssKeyValueContext property : ctx.cssKeyValue()) {
             properties.add((CssPropertyNode) visit(property));
         }
-        if (selector instanceof CssNode) {
-            ((CssNode) selector).setProperties(properties);
-            css.setAncestor(((CssNode) selector).getAncestor());
-            css.setDescendant(((CssNode) selector).getDescendant());
+        if (selector instanceof CssBlockNode block) {
+            for (CssNode node : block.getElements()) {
+                node.setProperties(properties);
+            }
+            return setLine(block, ctx);
         } else {
-            css = new CssNode(null, selector);
+            CssNode css;
+            if (selector instanceof CssNode) {
+                css = (CssNode) selector;
+            } else {
+                css = new CssNode(null, selector);
+            }
+            css.setProperties(properties);
+            return setLine(css, ctx);
         }
-        css.setProperties(properties);
-        return css;
     }
 
     @Override
     public ASTNode visitDescendantSelector(PythonParser.DescendantSelectorContext ctx) {
         ASTNode ancestor = visit(ctx.left);
         ASTNode descendant = visit(ctx.right);
-        return new CssNode(ancestor, descendant);
+        return setLine(new CssNode(ancestor, descendant), ctx);
+    }
+
+    @Override
+    public ASTNode visitGroupSelector(PythonParser.GroupSelectorContext ctx) {
+        List<CssNode> elements = new ArrayList<>();
+        for (PythonParser.CssSelectorContext selectorCtx : ctx.cssSelector()) {
+            ASTNode visited = visit(selectorCtx);
+
+            if (visited instanceof CssBlockNode block) {
+                elements.addAll(block.getElements());
+            }
+            else if (visited instanceof CssNode node) {
+                elements.add(node);
+            }
+            else {
+                elements.add(new CssNode(null, visited));
+            }
+        }
+        return new CssBlockNode(elements);
     }
 
     @Override
     public ASTNode visitIdSelector(PythonParser.IdSelectorContext ctx) {
         IdentifierNode selector = (IdentifierNode) visit(ctx.selectorName());
         selector.setName('#' + selector.getName());
-        return selector;
+        return setLine(selector, ctx);
     }
 
     @Override
     public ASTNode visitClassSelector(PythonParser.ClassSelectorContext ctx) {
         IdentifierNode selector = (IdentifierNode) visit(ctx.selectorName());
         selector.setName('.' + selector.getName());
-        return selector;
-    }
-
-    @Override
-    public ASTNode visitSimpleSelector(PythonParser.SimpleSelectorContext ctx) {
-        return super.visitSimpleSelector(ctx);
+        return setLine(selector, ctx);
     }
 
     @Override
@@ -1004,40 +1059,40 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         for (int i = 1; i < ctx.CSS_ID().size(); i++) {
             sb.append('-').append(ctx.CSS_ID(i).getText());
         }
-        return new IdentifierNode(sb.toString());
-    }
-
-    @Override
-    public ASTNode visitCssJinjaValue(PythonParser.CssJinjaValueContext ctx) {
-        return super.visitCssJinjaValue(ctx);
+        return setLine(new IdentifierNode(sb.toString()), ctx);
     }
 
     @Override
     public ASTNode visitCssKeyValue(PythonParser.CssKeyValueContext ctx) {
         ASTNode key = new IdentifierNode(ctx.CSS_ID().getText());
-        ASTNode value = visit(ctx.cssValue());
-        return new CssPropertyNode(key, value);
+        List<ASTNode> values = new ArrayList<>();
+        for (PythonParser.CssValueContext value : ctx.cssValue()) {
+            values.add(visit(value));
+        }
+        return setLine(new CssPropertyNode(key, values), ctx);
     }
 
     @Override
     public ASTNode visitCssHexValue(PythonParser.CssHexValueContext ctx) {
-        return new StringNode(ctx.CSS_HEX().getText());
+        return setLine(new StringNode(ctx.CSS_HEX().getText()), ctx);
     }
 
     @Override
     public ASTNode visitCssNumValue(PythonParser.CssNumValueContext ctx) {
         String num = ctx.CSS_NUMBER().getText();
-        String type = ctx.CSS_TYPE().getText();
-        return new StringNode(num + type);
+        String type = null;
+        if (ctx.CSS_TYPE() != null)
+            type = ctx.CSS_TYPE().getText();
+        return setLine(new StringNode(num + type), ctx);
     }
 
     @Override
     public ASTNode visitCssIdValue(PythonParser.CssIdValueContext ctx) {
-        return new IdentifierNode(ctx.CSS_ID().getText());
+        return setLine(new IdentifierNode(ctx.CSS_ID().getText()), ctx);
     }
 
     @Override
     public ASTNode visitCssStrValue(PythonParser.CssStrValueContext ctx) {
-        return new StringNode(ctx.STRING().getText());
+        return setLine(new StringNode(ctx.STRING().getText()), ctx);
     }
 }

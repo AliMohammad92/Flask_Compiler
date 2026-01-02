@@ -1,25 +1,23 @@
 package AST.JINJA2;
 
 import AST.ASTNode;
-import java.util.Map;
+import AST.CSS.CssNode;
+
+import java.util.List;
 
 public class JSONNode extends ASTNode {
-    private Map<String, ASTNode> jsonData;
+    private List<JSONData> data;
 
-    public JSONNode(Map<String, ASTNode> jsonData) {
-        this.jsonData = jsonData;
+    public JSONNode(List<JSONData> data) {
+        this.data = data;
     }
 
-    public void addData(String key, ASTNode value) {
-        this.jsonData.put(key, value);
+    public List<JSONData> getData() {
+        return data;
     }
 
-    public ASTNode getByKey(String key) {
-        return this.jsonData.get(key);
-    }
-
-    public Map<String, ASTNode> getJsonData() {
-        return jsonData;
+    public void setData(List<JSONData> data) {
+        this.data = data;
     }
 
     @Override
@@ -27,31 +25,13 @@ public class JSONNode extends ASTNode {
         StringBuilder sb = new StringBuilder();
 
         sb.append(prefix)
-                .append(isTail ? "└── " : "├── ")
-                .append("JSONNode\n");
+                .append(isTail ? "└── " : "├── ").append("JSONNode").append(getLineInfo()).append("\n");
 
         String childPrefix = prefix + (isTail ? "    " : "│   ");
-        int i = 0;
-        int size = jsonData.size();
 
-        for (Map.Entry<String, ASTNode> entry : jsonData.entrySet()) {
-            boolean last = (++i == size);
-            sb.append(childPrefix)
-                    .append(last ? "└── " : "├── ")
-                    .append("\"")
-                    .append(entry.getKey())
-                    .append("\": ");
-
-            ASTNode value = entry.getValue();
-            if (value != null) {
-                String valueStr = value.toTreeString(childPrefix + (last ? "    " : "│   "), true).trim();
-                if (!valueStr.contains("\n"))
-                    sb.append(valueStr).append("\n");
-                else
-                    sb.append("\n").append(valueStr).append("\n");
-            } else {
-                sb.append("null\n");
-            }
+        for (int i = 0; i < data.size(); i++) {
+            JSONData node = data.get(i);
+            sb.append(node.toTreeString(childPrefix, i == data.size() - 1));
         }
 
         return sb.toString();

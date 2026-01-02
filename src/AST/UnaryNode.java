@@ -14,7 +14,7 @@ public class UnaryNode extends ASTNode {
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
-        sb.append(formatLine(prefix, isTail, "UnaryNode(" + operator + ")"));
+        sb.append(formatLine(prefix, isTail, "UnaryNode(" + operator + ")" + getLineInfo()));
         sb.append(expression.toTreeString(nextPrefix(prefix, true), true));
         return sb.toString();
     }

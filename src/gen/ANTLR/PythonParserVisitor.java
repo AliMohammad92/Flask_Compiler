@@ -71,11 +71,12 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitElements(PythonParser.ElementsContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link PythonParser#json}.
+	 * Visit a parse tree produced by the {@code jsonRule}
+	 * labeled alternative in {@link PythonParser#json}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitJson(PythonParser.JsonContext ctx);
+	T visitJsonRule(PythonParser.JsonRuleContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PythonParser#jsonData}.
 	 * @param ctx the parse tree
@@ -284,6 +285,20 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFalse(PythonParser.FalseContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code Triple_String}
+	 * labeled alternative in {@link PythonParser#primaryAtom}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTriple_String(PythonParser.Triple_StringContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code None}
+	 * labeled alternative in {@link PythonParser#primaryAtom}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNone(PythonParser.NoneContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code DotAccess}
 	 * labeled alternative in {@link PythonParser#postfix}.
 	 * @param ctx the parse tree
@@ -433,6 +448,13 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitReturnValue(PythonParser.ReturnValueContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code returnTripleString}
+	 * labeled alternative in {@link PythonParser#returnStatement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitReturnTripleString(PythonParser.ReturnTripleStringContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link PythonParser#tripleString}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -578,6 +600,18 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitHtml(PythonParser.HtmlContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link PythonParser#normalTag}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNormalTag(PythonParser.NormalTagContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PythonParser#selfClosing}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSelfClosing(PythonParser.SelfClosingContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link PythonParser#htmlElement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -596,17 +630,17 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitStyleTag(PythonParser.StyleTagContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link PythonParser#genericHtml}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitGenericHtml(PythonParser.GenericHtmlContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link PythonParser#selfClosingTag}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitSelfClosingTag(PythonParser.SelfClosingTagContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PythonParser#nestedTag}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNestedTag(PythonParser.NestedTagContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PythonParser#htmlAttributes}.
 	 * @param ctx the parse tree
@@ -655,48 +689,6 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitNormalText(PythonParser.NormalTextContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code quotedText}
-	 * labeled alternative in {@link PythonParser#htmlTextPart}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitQuotedText(PythonParser.QuotedTextContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code tagAsText}
-	 * labeled alternative in {@link PythonParser#htmlTextPart}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTagAsText(PythonParser.TagAsTextContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code attrAsText}
-	 * labeled alternative in {@link PythonParser#htmlTextPart}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAttrAsText(PythonParser.AttrAsTextContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code idAsText}
-	 * labeled alternative in {@link PythonParser#htmlTextPart}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitIdAsText(PythonParser.IdAsTextContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code classAsText}
-	 * labeled alternative in {@link PythonParser#htmlTextPart}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitClassAsText(PythonParser.ClassAsTextContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code numberAsText}
-	 * labeled alternative in {@link PythonParser#htmlTextPart}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitNumberAsText(PythonParser.NumberAsTextContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code jinjaAsText}
 	 * labeled alternative in {@link PythonParser#htmlTextPart}.
 	 * @param ctx the parse tree
@@ -716,6 +708,13 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitDescendantSelector(PythonParser.DescendantSelectorContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code groupSelector}
+	 * labeled alternative in {@link PythonParser#cssSelector}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGroupSelector(PythonParser.GroupSelectorContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code idSelector}
 	 * labeled alternative in {@link PythonParser#cssSelector}.

@@ -47,7 +47,7 @@ public class CssNode extends ASTNode {
         StringBuilder sb = new StringBuilder();
 
         // 1. طباعة اسم النود الأساسي
-        sb.append(formatLine(prefix, isTail, "CssNode"));
+        sb.append(formatLine(prefix, isTail, "CssNode" + getLineInfo()));
 
         String newPrefix = nextPrefix(prefix, isTail);
 

@@ -20,7 +20,7 @@ public class IncludeNode extends ASTNode {
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
-        sb.append(formatLine(prefix, isTail, "IncludeNode"));
+        sb.append(formatLine(prefix, isTail, "IncludeNode" + getLineInfo()));
         sb.append(formatLine(nextPrefix(prefix, isTail), false,
                 "ignoreMissing=" + ignoreMissing + ", withContext=" + withContext));
         sb.append(template.toTreeString(nextPrefix(prefix, true), true));

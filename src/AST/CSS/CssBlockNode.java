@@ -21,7 +21,7 @@ public class CssBlockNode extends ASTNode {
 
         sb.append(prefix)
                 .append(isTail ? "└── " : "├── ")
-                .append("CssBlockNode\n");
+                .append("CssBlockNode" + getLineInfo() + "\n");
 
         String childPrefix = prefix + (isTail ? "    " : "│   ");
 

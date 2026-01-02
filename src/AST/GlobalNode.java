@@ -16,17 +16,21 @@ public class GlobalNode extends ASTNode {
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
+
         sb.append(prefix)
                 .append(isTail ? "└── " : "├── ")
-                .append("GlobalNode\n");
+                .append("GlobalNode")
+                .append(getLineInfo())
+                .append("\n");
 
         String childPrefix = prefix + (isTail ? "    " : "│   ");
         for (int i = 0; i < variables.size(); i++) {
-            sb.append(childPrefix)
-                    .append(i == variables.size() - 1 ? "└── " : "├── ")
-                    .append(variables.get(i))
-                    .append("\n");
+            IdentifierNode var = variables.get(i);
+            boolean last = (i == variables.size() - 1);
+            sb.append(var.toTreeString(childPrefix, last));
         }
+
         return sb.toString();
     }
+
 }

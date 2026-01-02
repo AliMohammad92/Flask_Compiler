@@ -17,7 +17,7 @@ public class TupleNode extends ASTNode {
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
-        sb.append(formatLine(prefix, isTail, "TupleNode"));
+        sb.append(formatLine(prefix, isTail, "TupleNode" + getLineInfo()));
         for (int i = 0; i < elements.size(); i++)
             sb.append(elements.get(i).toTreeString(nextPrefix(prefix, isTail), i == elements.size() - 1));
         return sb.toString();

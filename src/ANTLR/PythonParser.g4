@@ -13,6 +13,7 @@ statement
     | css
     | simpleStatement (SEMI simpleStatement)*
     | html
+    | expressions
     ;
 
 simpleStatement
@@ -39,14 +40,14 @@ assignment
     ;
 
 value
-    : tripleString
-    | atom
+    : json
     | expressions
     | list
     | tuple
-    | json
+    | atom
     | functionCall
     | listComprehension
+    | lambda
     ;
 
 list
@@ -66,11 +67,11 @@ elements
     ;
 
 json
-    : LCBRACK (jsonData (COMMA jsonData)*)? RCBRACK
+    : LCBRACK (jsonData (COMMA jsonData)*)? RCBRACK #jsonRule
     ;
 
 jsonData
-    :  STRING COLON value
+    : STRING COLON value
     ;
 
 // ------------------- Expressions -------------------
@@ -115,6 +116,10 @@ valuesExp
     | functionCall
     ;
 
+lambda
+    : LAMBDA parameters* COLON expressions
+    ;
+
 atom
     : primaryAtom postfix*   #AtomWithAccess
     ;
@@ -123,9 +128,10 @@ primaryAtom
     : IDENTIFIER                 #Id
     | NUMBER                     #Number
     | STRING                     #String
-//    | LPAREN expressions RPAREN  #Paren
     | TRUE                       #True
     | FALSE                      #False
+    | TRIPLE_STRING              #Triple_String
+    | NONE                       #None
     ;
 
 postfix
@@ -137,7 +143,6 @@ globalStatement
     : GLOBAL IDENTIFIER (COMMA IDENTIFIER)*
     ;
 // ------------------- Import Statement -------------------
-
 pythonImport
     : importSyntax
     | fromImport
@@ -157,7 +162,7 @@ importSource
     ;
 
 importList
-    : importName (COMMA importName)
+    : importName (COMMA importName)*
     ;
 
 importName
@@ -203,6 +208,10 @@ elseBlock
 forLoop
     : FOR IDENTIFIER IN iterable=value block;
 
+forExpression
+    : expressions FOR IDENTIFIER IN expressions (IF expressions)?
+    ;
+
 whileLoop
     : WHILE LPAREN expressions RPAREN block;
 
@@ -218,13 +227,14 @@ parameter
 
 returnStatement
     : RETURN value (COMMA value)*          #returnValue
+    | RETURN tripleString                  #returnTripleString
     ;
 
 tripleString
     : TRIPLE_STRING
     ;
 
-functionCall
+    functionCall
     : IDENTIFIER LPAREN argument* RPAREN
     ;
 
@@ -326,39 +336,43 @@ templateBody
     : (htmlElement | jinjaBody | statement)*
     ;
 
-// ------------------- FLASK -------------------
-//flask
-//    : pythonImport
-//    ;
 // ------------------- HTML -------------------
 html
-    : HTML_START htmlElement* HTML_END
+    : htmlElement+
+    ;
+
+normalTag
+    : TAG_OPEN htmlAttributes* TAG_CLOSE htmlElement* CONTENT_END_TAG
+    ;
+
+selfClosing
+    : TAG_OPEN htmlAttributes* TAG_SLASH
     ;
 
 htmlElement
     : htmlTag
-    | selfClosingTag
     | jinjaBody
     | htmlText
+    | selfClosingTag
+    | nestedTag
     ;
 
 htmlTag
-    : styleTag
-    | genericHtml
+    : normalTag
+    | styleTag
+    | selfClosing
     ;
 
 styleTag
     : HTML_STYLE_START css* STYLE_END
     ;
 
-genericHtml
-    : TAG_OPEN name=HTML_TAG_NAME htmlAttributes* TAG_CLOSE
-      htmlElement*
-      TAG_OPEN TAG_SLASH HTML_TAG_NAME TAG_CLOSE
+selfClosingTag
+    : NESTED_TAG_OPEN htmlAttributes* TAG_SLASH
     ;
 
-selfClosingTag
-    : TAG_OPEN name=HTML_TAG_NAME htmlAttributes* TAG_SLASH TAG_CLOSE
+nestedTag
+    : NESTED_TAG_OPEN htmlAttributes* TAG_CLOSE htmlElement* CONTENT_END_TAG
     ;
 
 htmlAttributes
@@ -377,16 +391,9 @@ htmlText
     ;
 
 htmlTextPart
-    : HTML_TEXT          #normalText
-    | STRING             #quotedText
-    | HTML_TAG_NAME      #tagAsText
-    | HTML_ATTR_NAME     #attrAsText
-    | IDENTIFIER         #idAsText
-    | CLASS              #classAsText
-    | NUMBER             #numberAsText
-    | jinjaExpression    #jinjaAsText
+    : HTML_TEXT                                                               #normalText
+    | EXPR_START jinjaExpression                                              #jinjaAsText
     ;
-
 // ------------------- CSS -------------------
 css
     : cssSelector CSS_PROPERTY_START cssKeyValue* CSS_PROPERTY_END
@@ -396,7 +403,8 @@ cssSelector
     : DOT selectorName                             #classSelector
     | HASHTAG selectorName                         #idSelector
     | selectorName                                 #simpleSelector
-    | left=cssSelector CSS_WS right=cssSelector    #descendantSelector
+    | cssSelector (COMMA cssSelector)+             #groupSelector
+    | left=cssSelector right=cssSelector           #descendantSelector
     ;
 
 selectorName
@@ -404,7 +412,7 @@ selectorName
     ;
 
 cssKeyValue
-    : CSS_ID CSS_COLON cssValue CSS_SEMI?
+    : CSS_ID COLON cssValue* CSS_SEMI?
     ;
 
 cssValue

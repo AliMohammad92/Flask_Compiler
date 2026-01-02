@@ -31,7 +31,7 @@ public class IfNode extends ASTNode {
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
-        sb.append(formatLine(prefix, isTail, "IfNode"));
+        sb.append(formatLine(prefix, isTail, "IfNode" + getLineInfo()));
         String newPrefix = nextPrefix(prefix, isTail);
         sb.append(formatLine(newPrefix, false, "Condition"));
         sb.append(condition.toTreeString(nextPrefix(newPrefix, false), true));

@@ -16,7 +16,7 @@ public class ArgumentNode extends ASTNode {
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
-        sb.append(formatLine(prefix, isTail, "ArgumentNode(" + name + ")"));
+        sb.append(formatLine(prefix, isTail, "ArgumentNode(" + name + ")" + getLineInfo()));
         if (value != null)
             sb.append(value.toTreeString(nextPrefix(prefix, true), true));
         return sb.toString();

@@ -13,10 +13,11 @@ public class ReturnNode extends ASTNode {
         return values;
     }
 
+
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
-        sb.append(formatLine(prefix, isTail, "ReturnNode"));
+        sb.append(formatLine(prefix, isTail, "ReturnNode" + getLineInfo()));
 
         if (values != null && !values.isEmpty()) {
             for (int i = 0; i < values.size(); i++) {
@@ -27,12 +28,5 @@ public class ReturnNode extends ASTNode {
         }
 
         return sb.toString();
-    }
-
-    @Override
-    public String toString() {
-        return "ReturnNode{" +
-                "values=" + values +
-                '}';
     }
 }

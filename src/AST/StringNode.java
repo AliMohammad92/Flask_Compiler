@@ -15,7 +15,7 @@ public class StringNode extends ASTNode {
 
     @Override
     public String toTreeString(String prefix, boolean isTail) {
-        return formatLine(prefix, isTail, "StringNode(" + text + ")");
+        return formatLine(prefix, isTail, "StringNode(" + text + ")" + getLineInfo());
     }
 
     @Override

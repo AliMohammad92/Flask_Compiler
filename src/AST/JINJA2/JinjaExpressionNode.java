@@ -12,7 +12,7 @@ public class JinjaExpressionNode extends ASTNode {
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
-        sb.append(formatLine(prefix, isTail, "JinjaExpressionNode"));
+        sb.append(formatLine(prefix, isTail, "JinjaExpressionNode" + getLineInfo()));
         if (expression != null)
             sb.append(expression.toTreeString(nextPrefix(prefix, true), true));
         return sb.toString();

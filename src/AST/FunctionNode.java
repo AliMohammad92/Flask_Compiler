@@ -1,6 +1,8 @@
 package AST;
 
 import org.antlr.runtime.tree.TreeWizard;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class FunctionNode extends ASTNode {
@@ -22,26 +24,50 @@ public class FunctionNode extends ASTNode {
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
-        sb.append(formatLine(prefix, isTail, "FunctionNode(" + name + ")"));
+        sb.append(formatLine(prefix, isTail, "FunctionNode(" + name + ")" + getLineInfo()));
+
         String newPrefix = nextPrefix(prefix, isTail);
-        if (parameters != null && !parameters.isEmpty()) {
-            sb.append(formatLine(newPrefix, false, "Parameters"));
-            for (int i = 0; i < parameters.size(); i++)
-                sb.append(parameters.get(i).toTreeString(nextPrefix(newPrefix, false), i == parameters.size() - 1));
-        }
-        if (body != null && !body.isEmpty()) {
-            sb.append(formatLine(newPrefix, true, "Body"));
-            for (int i = 0; i < body.size(); i++)
-                sb.append(body.get(i).toTreeString(nextPrefix(newPrefix, true), i == body.size() - 1));
-        }
+
+        List<String> sections = new ArrayList<>();
+        if (decorators != null && !decorators.isEmpty()) sections.add("decorators");
+        if (parameters != null && !parameters.isEmpty()) sections.add("parameters");
+        if (body != null && !body.isEmpty()) sections.add("body");
+
+        int sectionCount = sections.size();
+        int currentSection = 0;
+
         if (decorators != null && !decorators.isEmpty()) {
-            sb.append(formatLine(newPrefix, true, "Decorators"));
-            for (int i = 0; i < decorators.size(); i++)
-                sb.append(decorators.get(i).toTreeString(nextPrefix(newPrefix, true), i == decorators.size() - 1));
+            currentSection++;
+            boolean isLastSection = (currentSection == sectionCount);
+            sb.append(formatLine(newPrefix, isLastSection, "Decorators"));
+            String childPrefix = nextPrefix(newPrefix, isLastSection);
+            for (int i = 0; i < decorators.size(); i++) {
+                sb.append(decorators.get(i).toTreeString(childPrefix, i == decorators.size() - 1));
+            }
         }
+
+        if (parameters != null && !parameters.isEmpty()) {
+            currentSection++;
+            boolean isLastSection = (currentSection == sectionCount);
+            sb.append(formatLine(newPrefix, isLastSection, "Parameters"));
+            String childPrefix = nextPrefix(newPrefix, isLastSection);
+            for (int i = 0; i < parameters.size(); i++) {
+                sb.append(parameters.get(i).toTreeString(childPrefix, i == parameters.size() - 1));
+            }
+        }
+
+        if (body != null && !body.isEmpty()) {
+            currentSection++;
+            boolean isLastSection = (currentSection == sectionCount);
+            sb.append(formatLine(newPrefix, isLastSection, "Body"));
+            String childPrefix = nextPrefix(newPrefix, isLastSection);
+            for (int i = 0; i < body.size(); i++) {
+                sb.append(body.get(i).toTreeString(childPrefix, i == body.size() - 1));
+            }
+        }
+
         return sb.toString();
     }
-
 
     @Override
     public String toString() {

@@ -16,11 +16,11 @@ public class ElifNode extends ASTNode {
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
-        sb.append(formatLine(prefix, isTail, "ElifNode"));
+        sb.append(formatLine(prefix, isTail, "ElifNode" + getLineInfo()));
         String newPrefix = nextPrefix(prefix, isTail);
-        sb.append(formatLine(newPrefix, false, "Condition"));
+        sb.append(formatLine(newPrefix, false, "Condition" + getLineInfo()));
         sb.append(condition.toTreeString(nextPrefix(newPrefix, false), true));
-        sb.append(formatLine(newPrefix, true, "Body"));
+        sb.append(formatLine(newPrefix, true, "Body" + getLineInfo()));
         for (int i = 0; i < body.size(); i++)
             sb.append(body.get(i).toTreeString(nextPrefix(newPrefix, true), i == body.size() - 1));
         return sb.toString();

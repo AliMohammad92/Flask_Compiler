@@ -79,6 +79,7 @@ AS         : 'as';
 SET        : 'set';
 PIPE       : '|';
 GLOBAL     : 'global';
+LAMBDA     : 'lambda';
 
 // ------------------- Operators -------------------
 PLUS       : '+';
@@ -112,10 +113,13 @@ DOT        : '.';
 HASHTAG    : '#';
 AT         : '@';
 // ----------------- HTML & CSS -------------------
-HTML_START  : '<html>'  -> pushMode(HTML_MODE);
+TAG_OPEN
+    : '<' [a-zA-Z_][a-zA-Z0-9_-]*      -> pushMode(HTML_MODE)
+    ;
+
 
 TRIPLE_STRING
-    : '"""' .*? '"""'
+    : '"""' ( ~["] | '"' ~["] | '""' ~["] )* '"""'
     ;
 
 // ------------------- Literals -------------------
@@ -146,12 +150,12 @@ mode JINJA_MODE;
     STMT_END : '%}' -> popMode;
     COMMENT_END : '#}' -> popMode;
 
-    JINJA_PIPE : '|' ;
-    JINJA_DOT : '.' ;
+    JINJA_PIPE : '|' -> type(PIPE);
+    JINJA_DOT : '.'  -> type(DOT);
     JINJA_LPAREN : '(' ;
     JINJA_RPAREN : ')' ;
     JINJA_COMMA : ',' ;
-    JINJA_COLON : ':' ;
+    JINJA_COLON : ':' -> type(COLON);
     JINJA_ASSIGN : '=' -> type(ASSIGN);
 
     // Keywords
@@ -210,47 +214,52 @@ mode JINJA_MODE;
     J_OR_SYM     : '||'  -> type(OR);
 
     JINJA_WS : [ \t\r\n]+ -> skip ;
-    //JINJA_COMMENT : . -> skip ;
 
 mode CSS_MODE;
     CSS_WS : [ \t\r\n]+ -> skip;
     CSS_EXPR_START  : '{{' -> type(EXPR_START), pushMode(JINJA_MODE);
     CSS_PROPERTY_START : '{' ;
     CSS_PROPERTY_END : '}' ;
-    CSS_COLON : ':' ;
+    CSS_COLON : ':' -> type(COLON);
+    CSS_COMMA : ',' -> type(COMMA);
+    CSS_HASHTAG : '#' -> type(HASHTAG);
+    CSS_DOT     : '.' -> type(DOT);
+
     CSS_SEMI : ';' ;
     CSS_NUMBER : ('+'|'-')? [0-9]+ ('.' [0-9]+)? ;
     CSS_TYPE   : ('px' | 'em' | 'rem' | '%' | 'vh' | 'vw' | 'deg' | 's' | 'ms') ;
     CSS_COM_S  : '/*';
     CSS_COM_E  : '*/';
-
     STYLE_END : '</style>' -> popMode;
-
     CSS_ID : [a-zA-Z_][a-zA-Z_\-0-9]* ;
-    CSS_HEX : '#' [a-fA-F0-9]+ ;
+    CSS_COMMENT     : '/*' .*? '*/' -> skip;
 
-    CSS_UNKOWN: . -> popMode;
+    CSS_HEX : '#' [a-fA-F0-9]+ ;
 
 mode HTML_MODE;
 
-    HTML_EXPR_START  : '{{' -> type(EXPR_START), pushMode(JINJA_MODE);
-    HTML_STMT_START  : '{%' -> type(STMT_START), pushMode(JINJA_MODE);
-
-    HTML_STYLE_START : '<style>' -> pushMode(CSS_MODE);
-    HTML_END         : '</html>' -> popMode;
-
-    TAG_OPEN         : '<';
-    TAG_CLOSE        : '>';
-    TAG_SLASH        : '/';
+    TAG_SLASH        : [ \t\r\n]* '/>' -> popMode;
+    TAG_CLOSE        : [ \t\r\n]* '>' -> popMode, pushMode(CONTENT_MODE);
     HTML_ASSIGN      : '=';
 
     HTML_STRING      : ('"' (~["\\] | '\\' .)* '"' | '\'' (~['\\] | '\\' .)* '\'') -> type(STRING);
 
     HTML_NUMBER      : ('+'|'-')? [0-9]+ ('.' [0-9]+)? -> type(NUMBER);
     HTML_CLASS       : 'class'                         -> type(CLASS);
-    HTML_TAG_NAME    : [a-zA-Z][a-zA-Z0-9]*;
     HTML_ATTR_NAME   : [a-zA-Z_][a-zA-Z0-9_-]*;
 
-    HTML_TEXT        : ~[<>{}/ \t\r\n='"]+ ;
-
+    HTML_COMMENT     : '<!--' .*? '-->' -> skip;
     HTML_WS : [ \t\r\n]+ -> skip;
+
+mode CONTENT_MODE;
+
+    HTML_TEXT : (~[<{ \t\r\n]) (~[<{])* ;
+    HTML_STYLE_START : '<style>' -> pushMode(CSS_MODE);
+
+    NESTED_TAG_OPEN : '<' [a-zA-Z_][a-zA-Z0-9_-]* -> pushMode(HTML_MODE);
+
+    CONTENT_END_TAG : '</' [a-zA-Z_][a-zA-Z0-9_-]* '>' -> popMode;
+    CONTENT_JINJA_START : '{{' -> pushMode(JINJA_MODE), type(EXPR_START);
+    CONTENT_JINJA_STMT  : '{%' -> pushMode(JINJA_MODE), type(STMT_START);
+
+    CONTENT_WS : [ \t\r\n]+ -> skip;

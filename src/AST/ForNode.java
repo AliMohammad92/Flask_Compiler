@@ -31,9 +31,9 @@ public class ForNode extends ASTNode {
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
-        sb.append(formatLine(prefix, isTail, "ForNode(" + variable + ")"));
+        sb.append(formatLine(prefix, isTail, "ForNode(" + variable + ")" + getLineInfo()));
         String newPrefix = nextPrefix(prefix, isTail);
-        sb.append(formatLine(newPrefix, false, "Iterable"));
+        sb.append(formatLine(newPrefix, false, "Iterable" + getLineInfo()));
         sb.append(iterable.toTreeString(nextPrefix(newPrefix, false), true));
         sb.append(formatLine(newPrefix, true, "Body"));
         for (int i = 0; i < body.size(); i++)

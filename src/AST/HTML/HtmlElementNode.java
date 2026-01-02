@@ -57,7 +57,7 @@ public class HtmlElementNode extends ASTNode {
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append(formatLine(prefix, isTail, "HtmlElementNode <" + tagName.getName() + ">"));
+        sb.append(formatLine(prefix, isTail, "HtmlElementNode <" + tagName.getName() + ">" + getLineInfo()));
 
         String newPrefix = nextPrefix(prefix, isTail);
 

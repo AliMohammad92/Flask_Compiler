@@ -15,7 +15,7 @@ public class AssignmentNode extends ASTNode{
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append(formatLine(prefix, isTail, "AssignmentNode(" + variableName + ")"));
+        sb.append(formatLine(prefix, isTail, "AssignmentNode(" + variableName + ")" + getLineInfo()));
 
         if (value != null) {
             sb.append(value.toTreeString(nextPrefix(prefix, isTail), true));

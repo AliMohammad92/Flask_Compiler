@@ -17,8 +17,25 @@ def add_product() {
         products.append(new_product)
         return redirect(url_for("show_products"))
     }
-    return render_template("add_product.html")
+    return """
+    <html>
+    <head>
+        <title>Add Product</title>
+    </head>
+    <body>
+    <h1>Add New Product</h1>
+    <form method="POST">
+        Name: <input type="text" name="name" /><br />
+        Price: <input type="text" name="price" /><br />
+        Image: <input type="text" name="image" /><br />
+        Details: <input type="text" name="details" /><br />
+        <button type="submit">Add Product</button>
+    </form>
+    </body>
+    </html>
 
+    """
+}
 if __name__ == "__main__" {
     app.run(debug=True)
 }

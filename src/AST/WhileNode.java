@@ -24,7 +24,7 @@ public class WhileNode extends ASTNode {
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
-        sb.append(formatLine(prefix, isTail, "WhileNode"));
+        sb.append(formatLine(prefix, isTail, "WhileNode" + getLineInfo()));
         String newPrefix = nextPrefix(prefix, isTail);
         sb.append(formatLine(newPrefix, false, "Expression"));
         sb.append(expression.toTreeString(nextPrefix(newPrefix, false), true));

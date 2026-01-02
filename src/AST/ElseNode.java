@@ -14,7 +14,7 @@ public class ElseNode extends  ASTNode {
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
-        sb.append(formatLine(prefix, isTail, "ElseNode"));
+        sb.append(formatLine(prefix, isTail, "ElseNode" + getLineInfo()));
         for (int i = 0; i < body.size(); i++)
             sb.append(body.get(i).toTreeString(nextPrefix(prefix, isTail), i == body.size() - 1));
         return sb.toString();

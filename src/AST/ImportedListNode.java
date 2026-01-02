@@ -14,7 +14,7 @@ public class ImportedListNode extends ASTNode {
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
-        sb.append(formatLine(prefix, isTail, "ImportedListNode"));
+        sb.append(formatLine(prefix, isTail, "ImportedListNode" + getLineInfo()));
 
         String newPrefix = nextPrefix(prefix, isTail);
 

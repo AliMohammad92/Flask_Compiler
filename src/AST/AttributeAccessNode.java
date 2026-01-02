@@ -12,7 +12,7 @@ public class AttributeAccessNode extends ASTNode {
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
-        sb.append(formatLine(prefix, isTail, "AttributeAccessNode"));
+        sb.append(formatLine(prefix, isTail, "AttributeAccessNode" + getLineInfo()));
 
         if (object != null) {
             sb.append(object.toTreeString(nextPrefix(prefix, isTail), false));

@@ -53,26 +53,26 @@ public class ClassNode extends ASTNode {
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
-        sb.append(formatLine(prefix, isTail, "ClassNode(" + name + (baseClass != null ? " : " + baseClass : "") + ")"));
+        sb.append(formatLine(prefix, isTail, "ClassNode(" + name + (baseClass != null ? " : " + baseClass : "") + ")" + getLineInfo()));
         String newPrefix = nextPrefix(prefix, isTail);
         if (variables != null && !variables.isEmpty()) {
-            sb.append(formatLine(newPrefix, false, "Variables"));
+            sb.append(formatLine(newPrefix, false, "Variables" + getLineInfo()));
             for (int i = 0; i < variables.size(); i++)
                 sb.append(variables.get(i).toTreeString(nextPrefix(newPrefix, false), i == variables.size() - 1));
         }
         if (methods != null && !methods.isEmpty()) {
-            sb.append(formatLine(newPrefix, false, "Methods"));
+            sb.append(formatLine(newPrefix, false, "Methods" + getLineInfo()));
             for (int i = 0; i < methods.size(); i++)
                 sb.append(methods.get(i).toTreeString(nextPrefix(newPrefix, false), i == methods.size() - 1));
         }
         if (nestedClasses != null && !nestedClasses.isEmpty()) {
-            sb.append(formatLine(newPrefix, true, "NestedClasses"));
+            sb.append(formatLine(newPrefix, true, "NestedClasses" + getLineInfo()));
             for (int i = 0; i < nestedClasses.size(); i++)
                 sb.append(nestedClasses.get(i).toTreeString(nextPrefix(newPrefix, true), i == nestedClasses.size() - 1));
         }
 
         if (decorators != null && !decorators.isEmpty()) {
-            sb.append(formatLine(newPrefix, true, "Decorators"));
+            sb.append(formatLine(newPrefix, true, "Decorators" + getLineInfo()));
             for (int i = 0; i < decorators.size(); i++)
                 sb.append(decorators.get(i).toTreeString(nextPrefix(newPrefix, true), i == decorators.size() - 1));
         }

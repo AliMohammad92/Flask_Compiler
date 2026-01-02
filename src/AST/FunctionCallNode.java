@@ -22,7 +22,7 @@ public class FunctionCallNode extends ASTNode {
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
-        sb.append(formatLine(prefix, isTail, "FunctionCallNode(" + functionName + ")"));
+        sb.append(formatLine(prefix, isTail, "FunctionCallNode(" + functionName + ")" + getLineInfo()));
         String newPrefix = nextPrefix(prefix, isTail);
         if (arguments != null && !arguments.isEmpty()) {
             sb.append(formatLine(newPrefix, true, "Arguments"));
@@ -35,7 +35,7 @@ public class FunctionCallNode extends ASTNode {
 
     @Override
     public String toString() {
-        return "FunctionCallNode(" + functionName + arguments + ")";
+        return functionName;
     }
 }
 

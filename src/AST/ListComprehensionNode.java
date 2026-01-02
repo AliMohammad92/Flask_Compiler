@@ -34,7 +34,7 @@ public class ListComprehensionNode extends ASTNode {
         StringBuilder sb = new StringBuilder();
         sb.append(prefix)
                 .append(isTail ? "└── " : "├── ")
-                .append("ListComprehensionNode(for " + variable + " in ...)\n");
+                .append("ListComprehensionNode(for " + variable + " in ...)" + getLineInfo() + "\n");
 
         String childPrefix = prefix + (isTail ? "    " : "│   ");
         sb.append(elementExpression.toTreeString(childPrefix, false));

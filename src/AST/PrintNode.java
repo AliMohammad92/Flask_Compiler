@@ -16,7 +16,7 @@ public class PrintNode extends ASTNode {
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
-        sb.append(formatLine(prefix, isTail, "PrintNode"));
+        sb.append(formatLine(prefix, isTail, "PrintNode" + getLineInfo()));
         for (int i = 0; i < contents.size(); i++)
             sb.append(contents.get(i).toTreeString(nextPrefix(prefix, isTail), i == contents.size() - 1));
         return sb.toString();

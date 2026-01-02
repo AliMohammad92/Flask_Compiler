@@ -19,7 +19,7 @@ public class ListNode extends ASTNode {
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
-        sb.append(formatLine(prefix, isTail, "ListNode"));
+        sb.append(formatLine(prefix, isTail, "ListNode" + getLineInfo()));
         for (int i = 0; i < elements.size(); i++)
             sb.append(elements.get(i).toTreeString(nextPrefix(prefix, isTail), i == elements.size() - 1));
         return sb.toString();
@@ -28,8 +28,6 @@ public class ListNode extends ASTNode {
 
     @Override
     public String toString() {
-        return "ListNode{" +
-                "elements=" + elements.toString() +
-                '}';
+        return elements.toString();
     }
 }

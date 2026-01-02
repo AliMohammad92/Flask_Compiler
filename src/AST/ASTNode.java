@@ -1,8 +1,22 @@
 package AST;
 
-import java.util.List;
-
 public abstract class ASTNode {
+    protected int lineNumber = 0;
+
+    public int getLineNumber(){
+        return lineNumber;
+    }
+
+    public void setLineNumber(int lineNumber) {
+        this.lineNumber = lineNumber;
+    }
+
+    public String getLineInfo() {
+        if (lineNumber > 0)
+            return " [Line: " + lineNumber + "]";
+        return "";
+    }
+
     public String toTreeString() {
         return toTreeString("", true);
     }

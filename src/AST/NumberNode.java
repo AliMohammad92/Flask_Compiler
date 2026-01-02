@@ -22,13 +22,11 @@ public class NumberNode extends ASTNode {
 
     @Override
     public String toTreeString(String prefix, boolean isTail) {
-        return formatLine(prefix, isTail, "NumberNode(" + value + ")");
+        return formatLine(prefix, isTail, "NumberNode(" + value + ")" + getLineInfo());
     }
 
     @Override
     public String toString() {
-        return "NumberNode{" +
-                "value=" + value +
-                '}';
+        return value;
     }
 }

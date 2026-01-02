@@ -16,7 +16,7 @@ public class BinaryOpNode extends ASTNode {
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
-        sb.append(formatLine(prefix, isTail, "BinaryOpNode(" + operator + ")"));
+        sb.append(formatLine(prefix, isTail, "BinaryOpNode(" + operator + ")" + getLineInfo()));
         sb.append(left.toTreeString(nextPrefix(prefix, false), false));
         sb.append(right.toTreeString(nextPrefix(prefix, true), true));
         return sb.toString();
