@@ -405,6 +405,17 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitListComprehension(PythonParser.ListComprehensionContext ctx) {
+        return visit(ctx.comprehension());
+    }
+
+
+    @Override
+    public ASTNode visitGeneratorExpression(PythonParser.GeneratorExpressionContext ctx) {
+        return visit(ctx.comprehension());
+    }
+
+    @Override
+    public ASTNode visitComprehension(PythonParser.ComprehensionContext ctx) {
         ASTNode elementExpression = visit(ctx.atom());
         ASTNode variable = new IdentifierNode(ctx.IDENTIFIER().getText());
         ASTNode iterable = visit(ctx.value());
@@ -412,7 +423,7 @@ public class ASTBuilder extends PythonParserBaseVisitor<ASTNode> {
         if (ctx.expressions() != null) {
             condition = visit(ctx.expressions());
         }
-        return setLine(new ListComprehensionNode(elementExpression, variable, iterable, condition), ctx);
+        return setLine(new ComprehensionNode(elementExpression, variable, iterable, condition), ctx);
     }
 
     @Override

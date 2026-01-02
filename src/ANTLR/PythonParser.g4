@@ -42,11 +42,11 @@ assignment
 value
     : json
     | expressions
+    | comprehensionParent
     | list
     | tuple
     | atom
     | functionCall
-    | listComprehension
     | lambda
     | cssValue
     ;
@@ -55,8 +55,20 @@ list
     : LBRACK elements RBRACK
     ;
 
+comprehensionParent
+    : listComprehension
+    | generatorExpression
+    ;
 listComprehension
-    : LBRACK atom FOR IDENTIFIER IN value (IF expressions)? RBRACK
+    : LBRACK comprehension RBRACK
+    ;
+
+generatorExpression
+    : LPAREN comprehension RPAREN
+    ;
+
+comprehension
+    : atom FOR IDENTIFIER IN value (IF expressions)?
     ;
 
 tuple
@@ -115,12 +127,12 @@ logicalExpressions
 valuesExp
     : atom
     | functionCall
+    | comprehensionParent
     ;
 
 lambda
     : LAMBDA parameters COLON expressions
     ;
-
 
 atom
     : primaryAtom postfix*   #AtomWithAccess
@@ -312,19 +324,19 @@ jinjaIfStatements
     : jinjaIf (jinjaElif)* (jinjaElse)? STMT_START JINJA_ENDIF STMT_END;
 
 jinjaIf
-    : JINJA_IF condition=expressions STMT_END templateBody
+    : IF condition=expressions STMT_END templateBody
     ;
 
 jinjaElif
-    : STMT_START JINJA_ELIF condition=expressions STMT_END templateBody
+    : STMT_START ELIF condition=expressions STMT_END templateBody
     ;
 
 jinjaElse
-    : STMT_START JINJA_ELSE STMT_END templateBody
+    : STMT_START ELSE STMT_END templateBody
     ;
 
 jinjaFor
-    : JINJA_FOR IDENTIFIER IN value STMT_END templateBody STMT_START JINJA_ENDFOR STMT_END
+    : FOR IDENTIFIER IN value STMT_END templateBody STMT_START JINJA_ENDFOR STMT_END
     ;
 
 jinjaSet

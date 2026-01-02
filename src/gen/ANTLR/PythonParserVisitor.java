@@ -53,11 +53,29 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitList(PythonParser.ListContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link PythonParser#comprehensionParent}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitComprehensionParent(PythonParser.ComprehensionParentContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link PythonParser#listComprehension}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitListComprehension(PythonParser.ListComprehensionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PythonParser#generatorExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGeneratorExpression(PythonParser.GeneratorExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PythonParser#comprehension}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitComprehension(PythonParser.ComprehensionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PythonParser#tuple}.
 	 * @param ctx the parse tree

@@ -78,6 +78,16 @@ public interface PythonParserListener extends ParseTreeListener {
 	 */
 	void exitList(PythonParser.ListContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link PythonParser#comprehensionParent}.
+	 * @param ctx the parse tree
+	 */
+	void enterComprehensionParent(PythonParser.ComprehensionParentContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PythonParser#comprehensionParent}.
+	 * @param ctx the parse tree
+	 */
+	void exitComprehensionParent(PythonParser.ComprehensionParentContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link PythonParser#listComprehension}.
 	 * @param ctx the parse tree
 	 */
@@ -87,6 +97,26 @@ public interface PythonParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitListComprehension(PythonParser.ListComprehensionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PythonParser#generatorExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterGeneratorExpression(PythonParser.GeneratorExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PythonParser#generatorExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitGeneratorExpression(PythonParser.GeneratorExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PythonParser#comprehension}.
+	 * @param ctx the parse tree
+	 */
+	void enterComprehension(PythonParser.ComprehensionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PythonParser#comprehension}.
+	 * @param ctx the parse tree
+	 */
+	void exitComprehension(PythonParser.ComprehensionContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link PythonParser#tuple}.
 	 * @param ctx the parse tree

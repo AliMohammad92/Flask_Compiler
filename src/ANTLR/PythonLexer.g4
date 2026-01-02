@@ -152,18 +152,20 @@ mode JINJA_MODE;
 
     JINJA_PIPE : '|' -> type(PIPE);
     JINJA_DOT : '.'  -> type(DOT);
-    JINJA_LPAREN : '(' ;
-    JINJA_RPAREN : ')' ;
-    JINJA_COMMA : ',' ;
+    JINJA_LPAREN : '(' -> type(LPAREN);
+    JINJA_RPAREN : ')' -> type(RPAREN);
+    JINJA_COMMA : ','  -> type(COMMA);
     JINJA_COLON : ':' -> type(COLON);
     JINJA_ASSIGN : '=' -> type(ASSIGN);
+    JINJA_LBRACK : '[' -> type(LBRACK);
+    JINJA_RBRACK : ']' -> type(RBRACK);
 
     // Keywords
-    JINJA_IF : 'if' ;
-    JINJA_ELIF : 'elif' ;
-    JINJA_ELSE : 'else' ;
+    JINJA_IF : 'if' -> type(IF);
+    JINJA_ELIF : 'elif' -> type(ELIF);
+    JINJA_ELSE : 'else' -> type(ELSE);
     JINJA_ENDIF : 'endif' ;
-    JINJA_FOR : 'for' ;
+    JINJA_FOR : 'for' -> type(FOR);
     JINJA_ENDFOR : 'endfor' ;
     JINJA_SET : 'set' ;
     JINJA_BLOCK : 'block' ;
@@ -178,6 +180,7 @@ mode JINJA_MODE;
     JINJA_CONTEXT : 'context';
     JINJA_IN      : 'in'  -> type(IN);
     JINJA_IS      : 'is'  -> type(IS);
+    JINJA_NOT     : 'not' -> type(NOT);
 
 
     JINJA_IDENTIFIER : [a-zA-Z_][a-zA-Z_0-9]*  -> type(IDENTIFIER);
@@ -234,6 +237,7 @@ mode CSS_MODE;
     CSS_TYPE   : ('px' | 'em' | 'rem' | '%' | 'vh' | 'vw' | 'deg' | 's' | 'ms') ;
     CSS_COM_S  : '/*';
     CSS_COM_E  : '*/';
+    CSS_STRING      : ('"' (~["\\] | '\\' .)* '"' | '\'' (~['\\] | '\\' .)* '\'') -> type(STRING);
     STYLE_END : '</style>' -> popMode;
     CSS_ID : [a-zA-Z_][a-zA-Z_\-0-9]*;
     CSS_COMMENT     : '/*' .*? '*/' -> skip;
@@ -265,7 +269,7 @@ mode CONTENT_MODE;
 
     CONTENT_END_TAG       : '</' [a-zA-Z_][a-zA-Z0-9_-]* '>' -> popMode;
 
-    CONTENT_JINJA_START   : '{{' -> pushMode(JINJA_MODE), type(EXPR_START);
-    CONTENT_JINJA_STMT    : '{%' -> pushMode(JINJA_MODE), type(STMT_START);
+    CONTENT_JINJA_START   : '{{' -> type(EXPR_START), pushMode(JINJA_MODE);
+    CONTENT_JINJA_STMT    : '{%' -> type(STMT_START), pushMode(JINJA_MODE);
 
     CONTENT_WS : [ \t\r\n]+ -> skip;

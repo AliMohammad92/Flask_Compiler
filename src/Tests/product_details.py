@@ -14,7 +14,6 @@ def product_details(id) {
     if product is None {
         abort(404)
     }
-
     return """
     <html>
     <head>
