@@ -43,11 +43,11 @@ def product_details(id) {
 
             h1 {
                 color: #333;
-                border-bottom: 2px - solid - #eeeeee;
+                border-bottom: 2px solid #eeeeee;
             }
 
             img {
-                border: 1px - solid - #cccccc;
+                border: 1px solid #cccccc;
             }
         </style>
     </head>

@@ -218,20 +218,24 @@ mode JINJA_MODE;
 mode CSS_MODE;
     CSS_WS : [ \t\r\n]+ -> skip;
     CSS_EXPR_START  : '{{' -> type(EXPR_START), pushMode(JINJA_MODE);
+
     CSS_PROPERTY_START : '{' ;
     CSS_PROPERTY_END : '}' ;
-    CSS_COLON : ':' -> type(COLON);
-    CSS_COMMA : ',' -> type(COMMA);
+
+    CSS_COLON : ':'   -> type(COLON);
+    CSS_COMMA : ','   -> type(COMMA);
     CSS_HASHTAG : '#' -> type(HASHTAG);
     CSS_DOT     : '.' -> type(DOT);
+    CSS_LPAREN : '('  -> type(LPAREN);
+    CSS_RPAREN : ')'  -> type(RPAREN);
 
     CSS_SEMI : ';' ;
-    CSS_NUMBER : ('+'|'-')? [0-9]+ ('.' [0-9]+)? ;
+    CSS_NUMBER : ('+'|'-')? [0-9]+ ('.' [0-9]+)? -> type(NUMBER);
     CSS_TYPE   : ('px' | 'em' | 'rem' | '%' | 'vh' | 'vw' | 'deg' | 's' | 'ms') ;
     CSS_COM_S  : '/*';
     CSS_COM_E  : '*/';
     STYLE_END : '</style>' -> popMode;
-    CSS_ID : [a-zA-Z_][a-zA-Z_\-0-9]* ;
+    CSS_ID : [a-zA-Z_][a-zA-Z_\-0-9]*;
     CSS_COMMENT     : '/*' .*? '*/' -> skip;
 
     CSS_HEX : '#' [a-fA-F0-9]+ ;
@@ -246,6 +250,7 @@ mode HTML_MODE;
 
     HTML_NUMBER      : ('+'|'-')? [0-9]+ ('.' [0-9]+)? -> type(NUMBER);
     HTML_CLASS       : 'class'                         -> type(CLASS);
+    REQUIRED         : 'required';
     HTML_ATTR_NAME   : [a-zA-Z_][a-zA-Z0-9_-]*;
 
     HTML_COMMENT     : '<!--' .*? '-->' -> skip;
@@ -253,13 +258,14 @@ mode HTML_MODE;
 
 mode CONTENT_MODE;
 
-    HTML_TEXT : (~[<{ \t\r\n]) (~[<{])* ;
-    HTML_STYLE_START : '<style>' -> pushMode(CSS_MODE);
+    HTML_TEXT             : (~[<{ \t\r\n]) (~[<{])* ;
+    HTML_STYLE_START      : '<style>' -> pushMode(CSS_MODE);
 
-    NESTED_TAG_OPEN : '<' [a-zA-Z_][a-zA-Z0-9_-]* -> pushMode(HTML_MODE);
+    NESTED_TAG_OPEN       : '<' [a-zA-Z_][a-zA-Z0-9_-]* -> pushMode(HTML_MODE);
 
-    CONTENT_END_TAG : '</' [a-zA-Z_][a-zA-Z0-9_-]* '>' -> popMode;
-    CONTENT_JINJA_START : '{{' -> pushMode(JINJA_MODE), type(EXPR_START);
-    CONTENT_JINJA_STMT  : '{%' -> pushMode(JINJA_MODE), type(STMT_START);
+    CONTENT_END_TAG       : '</' [a-zA-Z_][a-zA-Z0-9_-]* '>' -> popMode;
+
+    CONTENT_JINJA_START   : '{{' -> pushMode(JINJA_MODE), type(EXPR_START);
+    CONTENT_JINJA_STMT    : '{%' -> pushMode(JINJA_MODE), type(STMT_START);
 
     CONTENT_WS : [ \t\r\n]+ -> skip;

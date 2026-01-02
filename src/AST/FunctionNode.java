@@ -7,11 +7,11 @@ import java.util.List;
 
 public class FunctionNode extends ASTNode {
     private String name;
-    private List<ParameterNode> parameters;
+    private ParametersNode parameters;
     private List<ASTNode> body;
     private List<DecoratorNode> decorators;
 
-    public FunctionNode(String name, List<ParameterNode> parameters, List<ASTNode> body) {
+    public FunctionNode(String name, ParametersNode parameters, List<ASTNode> body) {
         this.name = name;
         this.parameters = parameters;
         this.body = body;
@@ -24,43 +24,40 @@ public class FunctionNode extends ASTNode {
     @Override
     public String toTreeString(String prefix, boolean isTail) {
         StringBuilder sb = new StringBuilder();
-        sb.append(formatLine(prefix, isTail, "FunctionNode(" + name + ")" + getLineInfo()));
+        sb.append(formatLine(prefix, isTail, "FunctionNode: " + name + getLineInfo()));
 
         String newPrefix = nextPrefix(prefix, isTail);
 
-        List<String> sections = new ArrayList<>();
-        if (decorators != null && !decorators.isEmpty()) sections.add("decorators");
-        if (parameters != null && !parameters.isEmpty()) sections.add("parameters");
-        if (body != null && !body.isEmpty()) sections.add("body");
+        List<Object> children = new ArrayList<>();
+        if (decorators != null && !decorators.isEmpty()) children.add(decorators);
+        if (parameters != null) children.add(parameters);
+        if (body != null && !body.isEmpty()) children.add(body);
 
-        int sectionCount = sections.size();
-        int currentSection = 0;
+        int count = children.size();
+        int current = 0;
 
         if (decorators != null && !decorators.isEmpty()) {
-            currentSection++;
-            boolean isLastSection = (currentSection == sectionCount);
-            sb.append(formatLine(newPrefix, isLastSection, "Decorators"));
-            String childPrefix = nextPrefix(newPrefix, isLastSection);
+            current++;
+            boolean last = (current == count);
+            sb.append(formatLine(newPrefix, last, "Decorators"));
+            String childPrefix = nextPrefix(newPrefix, last);
             for (int i = 0; i < decorators.size(); i++) {
                 sb.append(decorators.get(i).toTreeString(childPrefix, i == decorators.size() - 1));
             }
         }
 
-        if (parameters != null && !parameters.isEmpty()) {
-            currentSection++;
-            boolean isLastSection = (currentSection == sectionCount);
-            sb.append(formatLine(newPrefix, isLastSection, "Parameters"));
-            String childPrefix = nextPrefix(newPrefix, isLastSection);
-            for (int i = 0; i < parameters.size(); i++) {
-                sb.append(parameters.get(i).toTreeString(childPrefix, i == parameters.size() - 1));
-            }
+        if (parameters != null) {
+            current++;
+            boolean last = (current == count);
+            // بننادي الـ toTreeString تبع عقدة الباراميترات وهي بتطبع حالها واللي تحتها
+            sb.append(parameters.toTreeString(newPrefix, last));
         }
 
         if (body != null && !body.isEmpty()) {
-            currentSection++;
-            boolean isLastSection = (currentSection == sectionCount);
-            sb.append(formatLine(newPrefix, isLastSection, "Body"));
-            String childPrefix = nextPrefix(newPrefix, isLastSection);
+            current++;
+            boolean last = (current == count);
+            sb.append(formatLine(newPrefix, last, "Body"));
+            String childPrefix = nextPrefix(newPrefix, last);
             for (int i = 0; i < body.size(); i++) {
                 sb.append(body.get(i).toTreeString(childPrefix, i == body.size() - 1));
             }

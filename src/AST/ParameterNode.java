@@ -1,15 +1,15 @@
 package AST;
 
 public class ParameterNode extends ASTNode {
-    private String name;
+    private ASTNode name;
     private ASTNode defaultValue;
 
-    public ParameterNode(String name, ASTNode defaultValue) {
+    public ParameterNode(ASTNode name, ASTNode defaultValue) {
         this.name = name;
         this.defaultValue = defaultValue;
     }
 
-    public String getName() { return name; }
+    public ASTNode getName() { return name; }
 
     public ASTNode getDefaultValue() { return defaultValue; }
 
@@ -27,7 +27,7 @@ public class ParameterNode extends ASTNode {
     public String toString() {
         if (defaultValue != null)
             return name + " = " + defaultValue;
-        return name;
+        return "" + name;
     }
 }
 

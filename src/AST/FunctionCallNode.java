@@ -3,15 +3,23 @@ package AST;
 import java.util.List;
 
 public class FunctionCallNode extends ASTNode {
-    private String functionName;
+    private ASTNode functionName;
     private List<ASTNode> arguments;
 
-    public FunctionCallNode(String functionName, List<ASTNode> arguments) {
+    public FunctionCallNode(ASTNode functionName, List<ASTNode> arguments) {
         this.functionName = functionName;
         this.arguments = arguments;
     }
 
-    public String getFunctionName() {
+    public void setFunctionName(ASTNode functionName) {
+        this.functionName = functionName;
+    }
+
+    public void setArguments(List<ASTNode> arguments) {
+        this.arguments = arguments;
+    }
+
+    public ASTNode getFunctionName() {
         return functionName;
     }
 
@@ -35,7 +43,7 @@ public class FunctionCallNode extends ASTNode {
 
     @Override
     public String toString() {
-        return functionName;
+        return "" + functionName;
     }
 }
 

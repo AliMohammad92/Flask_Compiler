@@ -243,6 +243,12 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitValuesExp(PythonParser.ValuesExpContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link PythonParser#lambda}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLambda(PythonParser.LambdaContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code AtomWithAccess}
 	 * labeled alternative in {@link PythonParser#atom}.
 	 * @param ctx the parse tree
@@ -417,6 +423,12 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitForLoop(PythonParser.ForLoopContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link PythonParser#forExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitForExpression(PythonParser.ForExpressionContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link PythonParser#whileLoop}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -435,11 +447,23 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitParameters(PythonParser.ParametersContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link PythonParser#parameter}.
+	 * Visit a parse tree produced by {@link PythonParser#mandatoryParams}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitParameter(PythonParser.ParameterContext ctx);
+	T visitMandatoryParams(PythonParser.MandatoryParamsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PythonParser#defaultParams}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDefaultParams(PythonParser.DefaultParamsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PythonParser#parameterWithValue}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParameterWithValue(PythonParser.ParameterWithValueContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code returnValue}
 	 * labeled alternative in {@link PythonParser#returnStatement}.
@@ -460,6 +484,27 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitTripleString(PythonParser.TripleStringContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code funCallID}
+	 * labeled alternative in {@link PythonParser#anyId}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunCallID(PythonParser.FunCallIDContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code funCallCSSID}
+	 * labeled alternative in {@link PythonParser#anyId}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunCallCSSID(PythonParser.FunCallCSSIDContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code funCallHTMLID}
+	 * labeled alternative in {@link PythonParser#anyId}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunCallHTMLID(PythonParser.FunCallHTMLIDContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PythonParser#functionCall}.
 	 * @param ctx the parse tree
@@ -600,18 +645,6 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitHtml(PythonParser.HtmlContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link PythonParser#normalTag}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitNormalTag(PythonParser.NormalTagContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link PythonParser#selfClosing}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSelfClosing(PythonParser.SelfClosingContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link PythonParser#htmlElement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -624,29 +657,53 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitHtmlTag(PythonParser.HtmlTagContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code normalTagRule}
+	 * labeled alternative in {@link PythonParser#normalTag}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNormalTagRule(PythonParser.NormalTagRuleContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code selfClosingRule}
+	 * labeled alternative in {@link PythonParser#selfClosing}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSelfClosingRule(PythonParser.SelfClosingRuleContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link PythonParser#styleTag}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitStyleTag(PythonParser.StyleTagContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link PythonParser#selfClosingTag}.
+	 * Visit a parse tree produced by the {@code nestedSelfClosingRule}
+	 * labeled alternative in {@link PythonParser#selfClosingTag}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSelfClosingTag(PythonParser.SelfClosingTagContext ctx);
+	T visitNestedSelfClosingRule(PythonParser.NestedSelfClosingRuleContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link PythonParser#nestedTag}.
+	 * Visit a parse tree produced by the {@code nestedTagRule}
+	 * labeled alternative in {@link PythonParser#nestedTag}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitNestedTag(PythonParser.NestedTagContext ctx);
+	T visitNestedTagRule(PythonParser.NestedTagRuleContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link PythonParser#htmlAttributes}.
+	 * Visit a parse tree produced by the {@code attributeWithValue}
+	 * labeled alternative in {@link PythonParser#htmlAttributes}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitHtmlAttributes(PythonParser.HtmlAttributesContext ctx);
+	T visitAttributeWithValue(PythonParser.AttributeWithValueContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code requiredAttribute}
+	 * labeled alternative in {@link PythonParser#htmlAttributes}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRequiredAttribute(PythonParser.RequiredAttributeContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code strAttrValue}
 	 * labeled alternative in {@link PythonParser#attributeValue}.
@@ -702,19 +759,19 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCss(PythonParser.CssContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code descendantSelector}
-	 * labeled alternative in {@link PythonParser#cssSelector}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitDescendantSelector(PythonParser.DescendantSelectorContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code groupSelector}
 	 * labeled alternative in {@link PythonParser#cssSelector}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitGroupSelector(PythonParser.GroupSelectorContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code descendantSelector}
+	 * labeled alternative in {@link PythonParser#cssSelector}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDescendantSelector(PythonParser.DescendantSelectorContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code idSelector}
 	 * labeled alternative in {@link PythonParser#cssSelector}.
@@ -742,6 +799,12 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitSelectorName(PythonParser.SelectorNameContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PythonParser#pseudo}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPseudo(PythonParser.PseudoContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PythonParser#cssKeyValue}.
 	 * @param ctx the parse tree
@@ -783,4 +846,11 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitCssJinjaValue(PythonParser.CssJinjaValueContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code cssFunValue}
+	 * labeled alternative in {@link PythonParser#cssValue}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCssFunValue(PythonParser.CssFunValueContext ctx);
 }

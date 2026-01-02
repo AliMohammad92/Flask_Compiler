@@ -48,6 +48,7 @@ value
     | functionCall
     | listComprehension
     | lambda
+    | cssValue
     ;
 
 list
@@ -117,8 +118,9 @@ valuesExp
     ;
 
 lambda
-    : LAMBDA parameters* COLON expressions
+    : LAMBDA parameters COLON expressions
     ;
+
 
 atom
     : primaryAtom postfix*   #AtomWithAccess
@@ -220,10 +222,21 @@ function
     : decorator_rule* DEF IDENTIFIER LPAREN parameters? RPAREN block;
 
 parameters
-    : parameter (COMMA parameter)*;
+    : mandatoryParams (COMMA defaultParams)?
+    | defaultParams
+    ;
 
-parameter
-    : IDENTIFIER (ASSIGN value)?;
+mandatoryParams
+    : IDENTIFIER (COMMA IDENTIFIER)*
+    ;
+
+defaultParams
+    : parameterWithValue (COMMA parameterWithValue)*
+    ;
+
+parameterWithValue
+    : IDENTIFIER ASSIGN value
+    ;
 
 returnStatement
     : RETURN value (COMMA value)*          #returnValue
@@ -234,8 +247,14 @@ tripleString
     : TRIPLE_STRING
     ;
 
-    functionCall
-    : IDENTIFIER LPAREN argument* RPAREN
+anyId
+    : IDENTIFIER        #funCallID
+    | CSS_ID            #funCallCSSID
+    | HTML_ATTR_NAME    #funCallHTMLID
+    ;
+
+functionCall
+    : anyId LPAREN argument* RPAREN
     ;
 
 argument
@@ -341,14 +360,6 @@ html
     : htmlElement+
     ;
 
-normalTag
-    : TAG_OPEN htmlAttributes* TAG_CLOSE htmlElement* CONTENT_END_TAG
-    ;
-
-selfClosing
-    : TAG_OPEN htmlAttributes* TAG_SLASH
-    ;
-
 htmlElement
     : htmlTag
     | jinjaBody
@@ -363,20 +374,32 @@ htmlTag
     | selfClosing
     ;
 
+
+normalTag
+    : TAG_OPEN htmlAttributes* TAG_CLOSE htmlElement* CONTENT_END_TAG #normalTagRule
+    ;
+
+selfClosing
+    : TAG_OPEN htmlAttributes* TAG_SLASH #selfClosingRule
+    ;
+
+
 styleTag
     : HTML_STYLE_START css* STYLE_END
     ;
 
+// Nested  Self Closing
 selfClosingTag
-    : NESTED_TAG_OPEN htmlAttributes* TAG_SLASH
+    : NESTED_TAG_OPEN htmlAttributes* TAG_SLASH #nestedSelfClosingRule
     ;
 
 nestedTag
-    : NESTED_TAG_OPEN htmlAttributes* TAG_CLOSE htmlElement* CONTENT_END_TAG
+    : NESTED_TAG_OPEN htmlAttributes* TAG_CLOSE htmlElement* CONTENT_END_TAG  #nestedTagRule
     ;
 
 htmlAttributes
-    : (HTML_ATTR_NAME | CLASS | IDENTIFIER) HTML_ASSIGN attributeValue
+    : (HTML_ATTR_NAME | CLASS) HTML_ASSIGN attributeValue   #attributeWithValue
+    | REQUIRED                                              #requiredAttribute
     ;
 
 attributeValue
@@ -394,6 +417,7 @@ htmlTextPart
     : HTML_TEXT                                                               #normalText
     | EXPR_START jinjaExpression                                              #jinjaAsText
     ;
+
 // ------------------- CSS -------------------
 css
     : cssSelector CSS_PROPERTY_START cssKeyValue* CSS_PROPERTY_END
@@ -403,22 +427,27 @@ cssSelector
     : DOT selectorName                             #classSelector
     | HASHTAG selectorName                         #idSelector
     | selectorName                                 #simpleSelector
-    | cssSelector (COMMA cssSelector)+             #groupSelector
+    | cssSelector COMMA cssSelector                #groupSelector
     | left=cssSelector right=cssSelector           #descendantSelector
     ;
 
 selectorName
-    : CSS_ID (MINUS CSS_ID)*
+    : CSS_ID pseudo*
+    ;
+
+pseudo
+    : COLON COLON? CSS_ID (LPAREN argument RPAREN)?
     ;
 
 cssKeyValue
-    : CSS_ID COLON cssValue* CSS_SEMI?
+    : CSS_ID COLON (cssValue COMMA?)* CSS_SEMI?
     ;
 
 cssValue
     : CSS_HEX                   #cssHexValue
-    | CSS_NUMBER (CSS_TYPE)?    #cssNumValue
+    | NUMBER (CSS_TYPE)?        #cssNumValue
     | CSS_ID                    #cssIdValue
     | STRING                    #cssStrValue
     | jinjaExpression           #cssJinjaValue
+    | functionCall              #cssFunValue
     ;
