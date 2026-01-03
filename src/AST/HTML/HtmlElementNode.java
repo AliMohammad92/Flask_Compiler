@@ -63,18 +63,17 @@ public class HtmlElementNode extends ASTNode {
 
         if (!attributes.isEmpty()) {
             for (int i = 0; i < attributes.size(); i++) {
-                boolean lastAttr = (i == attributes.size() - 1) && children.isEmpty();
-                sb.append(attributes.get(i).toTreeString(newPrefix, lastAttr));
+                boolean isLastAttribute = (i == attributes.size() - 1) && children.isEmpty();
+                sb.append(attributes.get(i).toTreeString(newPrefix, isLastAttribute));
             }
         }
 
         if (!children.isEmpty()) {
             for (int i = 0; i < children.size(); i++) {
-                boolean lastChild = (i == children.size() - 1);
-                sb.append(children.get(i).toTreeString(newPrefix, lastChild));
+                boolean isLastChild = (i == children.size() - 1);
+                sb.append(children.get(i).toTreeString(newPrefix, isLastChild));
             }
         }
-
         return sb.toString();
     }
 }

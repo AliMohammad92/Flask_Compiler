@@ -10,9 +10,7 @@ program
 statement
     : jinjaBody
     | compoundStatement
-    | css
     | simpleStatement (SEMI simpleStatement)*
-    | html
     | expressions
     ;
 

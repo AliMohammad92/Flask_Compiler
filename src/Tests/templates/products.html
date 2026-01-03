@@ -1,18 +1,86 @@
-<!DOCTYPE html>
 <html>
+
 <head>
-    <title>Products</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f4f7f6;
+            margin: 0;
+        }
+
+        .navbar {
+            background: #2c3e50;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+        }
+
+        .grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 25px;
+            padding: 40px;
+        }
+
+        .card {
+            background: white;
+            width: 260px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .card img {
+            width: 100%;
+            border-radius: 10px;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .price {
+            color: #27ae60;
+            font-size: 22px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .btn-del {
+            background: #e74c3c;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 8px;
+            display: inline-block;
+        }
+    </style>
 </head>
+
 <body>
-<h1>Products List</h1>
-<ul>
-    {% for product in products %}
-    <li>
-        <img src="{{ product.image }}" width="100">
-        <strong>{{ product.name }}</strong> - ${{ product.price }}
-        <p>{{ product.details }}</p>
-    </li>
+<div class="navbar">
+    <a href="/">Home</a>
+    <a href="/products">Show Products</a>
+    <a href="/add">Add Product</a>
+</div>
+<div class="grid">
+    {% for p in products %}
+    <div class="card">
+        <a href="/product/{{ p.id }}" style="text-decoration: none; color: inherit;">
+            <img src="{{ p.image }}" />
+            <h3>{{ p.name }}</h3>
+        </a>
+        <p class="price">${{ p.price }}</p>
+        <a href="/delete/{{ p.id }}" class="btn-del">Delete Item</a>
+    </div>
     {% endfor %}
-</ul>
+</div>
 </body>
+
 </html>
